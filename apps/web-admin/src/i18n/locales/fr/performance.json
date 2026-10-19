@@ -1,0 +1,78 @@
+{
+  "title": "Performance",
+  "subtitle": "Le temps productif de votre équipe, selon la façon dont vous classez les applications et les sites web.",
+  "tabs": {
+    "report": "Rapport",
+    "rules": "Règles de productivité"
+  },
+  "period": {
+    "label": "Période",
+    "last7": "7 derniers jours",
+    "last30": "30 derniers jours",
+    "custom": "Personnalisée",
+    "from": "Du",
+    "to": "Au"
+  },
+  "category": {
+    "productive": "Productif",
+    "neutral": "Neutre",
+    "unproductive": "Improductif",
+    "unclassified": "Non classé"
+  },
+  "report": {
+    "loading": "Chargement des performances…",
+    "error": "Impossible de charger les données de performance.",
+    "errorRange": "La date de début doit précéder la date de fin.",
+    "score": "Score de productivité",
+    "scoreSub": "Part productive du temps classé",
+    "productiveTime": "Temps productif",
+    "ofActive": "sur {{active}} d'activité",
+    "target": "Objectif quotidien atteint",
+    "targetSub": "Objectif de {{target}} par jour travaillé",
+    "coverage": "Temps classé",
+    "coverageSub": "Part du temps actif couverte par une règle",
+    "lowCoverage": "Seulement {{pct}} % du temps actif est classé : les scores peuvent être trompeurs.",
+    "classifyNow": "Classer les applications et les sites",
+    "byDay": "Temps de l'équipe par jour",
+    "top": "Les plus productifs",
+    "least": "Les moins productifs",
+    "noRank": "Aucune activité sur cette période.",
+    "empty": "Aucun {{members}} pour l'instant.",
+    "disclaimer": "Les scores montrent comment le temps a été réparti entre les applications et sites classés. Ils ne mesurent pas la qualité du travail et ne doivent pas être la seule base des décisions concernant les personnes."
+  },
+  "table": {
+    "name": "Nom",
+    "breakdown": "Répartition",
+    "active": "Actif",
+    "productive": "Productif",
+    "score": "Score",
+    "target": "Objectif",
+    "view": "Voir"
+  },
+  "rules": {
+    "subtitle": "Indiquez si les applications et sites utilisés par votre équipe sont productifs, neutres ou improductifs.",
+    "target": "Objectif productif quotidien",
+    "targetHelp": "Temps productif attendu par jour travaillé. Sert au calcul de « Objectif quotidien atteint ».",
+    "hoursPerDay": "heures / jour",
+    "save": "Enregistrer",
+    "targetSaved": "Objectif enregistré.",
+    "targetInvalid": "Saisissez un nombre d'heures entre 1 et 24.",
+    "apps": "Applications",
+    "websites": "Sites web",
+    "showAll": "Tout",
+    "showUnclassified": "Non classés ({{count}})",
+    "addAppPlaceholder": "Ajouter une application par son nom, ex. Visual Studio Code",
+    "addDomainPlaceholder": "Ajouter un site, ex. github.com",
+    "add": "Ajouter comme productif",
+    "loading": "Chargement des applications et des sites…",
+    "empty": "Rien n'a été suivi sur cette période.",
+    "error": "Impossible de charger les règles de productivité.",
+    "saveError": "Échec de l'enregistrement. Veuillez réessayer.",
+    "colApp": "Application",
+    "colDomain": "Site web",
+    "colTime": "Temps sur la période",
+    "colCategory": "Catégorie",
+    "appHelp": "Le temps passé dans le navigateur est réparti selon les sites visités : classez donc aussi les sites, pas seulement les applications. Le temps non classé n'est jamais compté comme improductif.",
+    "domainHelp": "Une règle de domaine s'applique aussi à ses sous-domaines : « google.com » inclut « mail.google.com », sauf si celui-ci a sa propre règle."
+  }
+}

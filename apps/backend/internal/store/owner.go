@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"ctracking/backend/internal/privacyapps"
-
 	"github.com/jackc/pgx/v5"
 )
 
@@ -26,10 +24,11 @@ type Business struct {
 	AllowEmployeeOverride   bool     `json:"allow_employee_override"`
 	ScreenshotMode          string   `json:"screenshot_mode"` // 'privacy' | 'normal'
 	ScreenshotSkipApps      []string `json:"screenshot_skip_apps"`
+	ProductiveTargetS       int      `json:"productive_target_s"` // expected productive seconds per day
 }
 
 // businessCols is the column list backing a Business scan (see scanBusiness).
-const businessCols = "id, name, kind, owner_user_id, screenshot_retention_days, screenshot_interval_s, idle_threshold_s, allow_employee_override, screenshot_mode, screenshot_skip_apps"
+const businessCols = "id, name, kind, owner_user_id, screenshot_retention_days, screenshot_interval_s, idle_threshold_s, allow_employee_override, screenshot_mode, screenshot_skip_apps, productive_target_s"
 
 // Employee is a member with the employee role within a business.
 type Employee struct {
@@ -37,25 +36,11 @@ type Employee struct {
 	Email       string `json:"email"`
 	Username    string `json:"username"`
 	DisplayName string `json:"display_name"`
-}
-
-// CreateBusiness creates a business and the owner membership in one transaction.
-// kind is 'team' | 'family'; pass "" to default to 'team'.
-func (s *Store) CreateBusiness(ctx context.Context, ownerID, name, kind string) (Business, error) {
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return Business{}, err
-	}
-	defer tx.Rollback(ctx)
-
-	biz, err := createBusinessTx(ctx, tx, ownerID, name, kind)
-	if err != nil {
-		return Business{}, err
-	}
-	if err := tx.Commit(ctx); err != nil {
-		return Business{}, err
-	}
-	return biz, nil
+	// Org&Emp directory fields (empty for self-serve accounts).
+	DepartmentID   string `json:"department_id"`
+	DepartmentName string `json:"department_name"`
+	JobTitle       string `json:"job_title"`
+	AvatarURL      string `json:"avatar_url"`
 }
 
 // scanner is satisfied by pgx.Row and pgx.Rows.
@@ -67,14 +52,17 @@ func scanBusiness(s scanner) (Business, error) {
 	var b Business
 	err := s.Scan(&b.ID, &b.Name, &b.Kind, &b.OwnerUserID, &b.ScreenshotRetentionDays,
 		&b.ScreenshotIntervalS, &b.IdleThresholdS, &b.AllowEmployeeOverride,
-		&b.ScreenshotMode, &b.ScreenshotSkipApps)
+		&b.ScreenshotMode, &b.ScreenshotSkipApps, &b.ProductiveTargetS)
 	return b, err
 }
 
-// ListBusinessesOwnedBy returns the businesses a user owns.
+// ListBusinessesOwnedBy returns the businesses a user manages (owner membership).
 func (s *Store) ListBusinessesOwnedBy(ctx context.Context, ownerID string) ([]Business, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT `+businessCols+` FROM businesses WHERE owner_user_id = $1 ORDER BY created_at`, ownerID)
+		`SELECT `+businessCols+` FROM businesses
+		  WHERE id IN (SELECT business_id FROM memberships
+		                WHERE user_id = $1 AND role = 'owner' AND deactivated_at IS NULL)
+		  ORDER BY created_at`, ownerID)
 	if err != nil {
 		return nil, err
 	}
@@ -96,84 +84,15 @@ func (s *Store) GetBusiness(ctx context.Context, id string) (Business, error) {
 	return getBusiness(ctx, s.pool, id)
 }
 
-// CreateEmployee creates an employee account + employee membership. If businessID is
-// nil, the employee is placed in the owner's first business, auto-creating a default
-// business ("<owner>'s Team") when the owner has none. If businessID is set, the
-// caller must own that business. All in one transaction.
-func (s *Store) CreateEmployee(ctx context.Context, ownerID string, businessID *string, email, username, passwordHash, displayName string) (Employee, Business, error) {
-	tx, err := s.pool.Begin(ctx)
-	if err != nil {
-		return Employee{}, Business{}, err
-	}
-	defer tx.Rollback(ctx)
-
-	var biz Business
-	if businessID != nil {
-		biz, err = getBusiness(ctx, tx, *businessID)
-		if err != nil {
-			return Employee{}, Business{}, err
-		}
-		if biz.OwnerUserID != ownerID {
-			return Employee{}, Business{}, ErrForbidden
-		}
-	} else {
-		biz, err = firstOwnedBusinessTx(ctx, tx, ownerID)
-		if errors.Is(err, ErrNotFound) {
-			// Skip-business flow: auto-create a default business for this owner.
-			// A parent owner gets a 'family' business labelled "...'s Family".
-			var ownerName, accountType string
-			if err := tx.QueryRow(ctx, `SELECT display_name, account_type FROM users WHERE id = $1`, ownerID).
-				Scan(&ownerName, &accountType); err != nil {
-				return Employee{}, Business{}, err
-			}
-			kind, suffix := "team", "'s Team"
-			if accountType == "parent" {
-				kind, suffix = "family", "'s Family"
-			}
-			biz, err = createBusinessTx(ctx, tx, ownerID, ownerName+suffix, kind)
-		}
-		if err != nil {
-			return Employee{}, Business{}, err
-		}
-	}
-
-	// Store NULL (not "") for a missing identifier so unique constraints don't
-	// collide across members and the CHECK constraint reads cleanly.
-	emailArg := nullableLower(email)
-	usernameArg := nullableLower(username)
-	var emp Employee
-	err = tx.QueryRow(ctx,
-		`INSERT INTO users (email, username, password_hash, display_name)
-		 VALUES ($1, $2, $3, $4) RETURNING id, COALESCE(email, ''), COALESCE(username, ''), display_name`,
-		emailArg, usernameArg, passwordHash, displayName,
-	).Scan(&emp.ID, &emp.Email, &emp.Username, &emp.DisplayName)
-	if isUniqueViolation(err) {
-		return Employee{}, Business{}, ErrConflict
-	}
-	if err != nil {
-		return Employee{}, Business{}, err
-	}
-
-	if _, err := tx.Exec(ctx,
-		`INSERT INTO memberships (user_id, business_id, role) VALUES ($1, $2, 'employee')`,
-		emp.ID, biz.ID,
-	); err != nil {
-		return Employee{}, Business{}, err
-	}
-
-	if err := tx.Commit(ctx); err != nil {
-		return Employee{}, Business{}, err
-	}
-	return emp, biz, nil
-}
-
 // ListEmployees returns the employee members of a business.
 func (s *Store) ListEmployees(ctx context.Context, businessID string) ([]Employee, error) {
 	rows, err := s.pool.Query(ctx,
-		`SELECT u.id, COALESCE(u.email, ''), COALESCE(u.username, ''), u.display_name
+		`SELECT u.id, COALESCE(u.email, ''), COALESCE(u.username, ''), u.display_name,
+		        COALESCE(m.department_id, ''), COALESCE(m.department_name, ''),
+		        COALESCE(m.job_title, ''), COALESCE(u.avatar_url, '')
 		   FROM memberships m
 		   JOIN users u ON u.id = m.user_id
-		  WHERE m.business_id = $1 AND m.role = 'employee'
+		  WHERE m.business_id = $1 AND m.role = 'employee' AND m.deactivated_at IS NULL
 		  ORDER BY u.display_name`, businessID)
 	if err != nil {
 		return nil, err
@@ -183,7 +102,8 @@ func (s *Store) ListEmployees(ctx context.Context, businessID string) ([]Employe
 	out := []Employee{}
 	for rows.Next() {
 		var e Employee
-		if err := rows.Scan(&e.ID, &e.Email, &e.Username, &e.DisplayName); err != nil {
+		if err := rows.Scan(&e.ID, &e.Email, &e.Username, &e.DisplayName,
+			&e.DepartmentID, &e.DepartmentName, &e.JobTitle, &e.AvatarURL); err != nil {
 			return nil, err
 		}
 		out = append(out, e)
@@ -200,6 +120,7 @@ var settableColumns = map[string]bool{
 	"allow_employee_override":   true,
 	"screenshot_mode":           true,
 	"screenshot_skip_apps":      true,
+	"productive_target_s":       true,
 }
 
 // UpdateBusinessSettings updates only the provided columns (keys must be in
@@ -274,39 +195,6 @@ func getBusiness(ctx context.Context, q rowQuerier, id string) (Business, error)
 		return Business{}, ErrNotFound
 	}
 	if err != nil {
-		return Business{}, err
-	}
-	return b, nil
-}
-
-func firstOwnedBusinessTx(ctx context.Context, tx pgx.Tx, ownerID string) (Business, error) {
-	b, err := scanBusiness(tx.QueryRow(ctx,
-		`SELECT `+businessCols+` FROM businesses WHERE owner_user_id = $1 ORDER BY created_at LIMIT 1`, ownerID))
-	if errors.Is(err, pgx.ErrNoRows) {
-		return Business{}, ErrNotFound
-	}
-	if err != nil {
-		return Business{}, err
-	}
-	return b, nil
-}
-
-func createBusinessTx(ctx context.Context, tx pgx.Tx, ownerID, name, kind string) (Business, error) {
-	if kind == "" {
-		kind = "team"
-	}
-	// New businesses start in privacy mode with the skip-list prefilled from the
-	// curated sensitive-app rules; owners can add/remove entries afterwards.
-	b, err := scanBusiness(tx.QueryRow(ctx,
-		`INSERT INTO businesses (name, owner_user_id, kind, screenshot_skip_apps) VALUES ($1, $2, $3, $4) RETURNING `+businessCols,
-		name, ownerID, kind, privacyapps.Flat()))
-	if err != nil {
-		return Business{}, err
-	}
-	if _, err := tx.Exec(ctx,
-		`INSERT INTO memberships (user_id, business_id, role) VALUES ($1, $2, 'owner')`,
-		ownerID, b.ID,
-	); err != nil {
 		return Business{}, err
 	}
 	return b, nil

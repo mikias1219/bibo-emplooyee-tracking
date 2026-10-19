@@ -1,0 +1,15 @@
+{
+  "uuid": "focused-app@workforce-intelligence",
+  "name": "Workforce Intelligence Focus Bridge",
+  "description": "Lets the Workforce Intelligence desktop agent see which application is in focus (app identity only, never window titles or content). Required for app tracking on GNOME Wayland.",
+  "shell-version": [
+    "45",
+    "46",
+    "47",
+    "48",
+    "49",
+    "50"
+  ],
+  "version": 2,
+  "url": "https://github.com/mikias1219/workforce-intelligence"
+}

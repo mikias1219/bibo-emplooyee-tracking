@@ -5,7 +5,8 @@
     "dashboard": "Panel",
     "employees": "Empleados",
     "settings": "Ajustes",
-    "messages": "Mensajes"
+    "messages": "Mensajes",
+    "performance": "Rendimiento"
   },
   "actions": {
     "signIn": "Iniciar sesión",

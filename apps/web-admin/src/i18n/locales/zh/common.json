@@ -5,7 +5,8 @@
     "dashboard": "仪表板",
     "employees": "员工",
     "settings": "设置",
-    "messages": "消息"
+    "messages": "消息",
+    "performance": "绩效"
   },
   "actions": {
     "signIn": "登录",

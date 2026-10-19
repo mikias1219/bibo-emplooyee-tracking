@@ -7,12 +7,15 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// IsBusinessOwner reports whether ownerID owns businessID.
+// ownerOf is the set of businesses the user ($2) manages: an active 'owner'
+// membership (Org&Emp owners/admins), so a tenant can have several owners.
+const ownerOf = `(SELECT business_id FROM memberships WHERE user_id = $2 AND role = 'owner' AND deactivated_at IS NULL)`
+
+// IsBusinessOwner reports whether ownerID manages businessID.
 func (s *Store) IsBusinessOwner(ctx context.Context, ownerID, businessID string) (bool, error) {
 	var ok bool
 	err := s.pool.QueryRow(ctx,
-		`SELECT EXISTS(SELECT 1 FROM businesses WHERE id = $1 AND owner_user_id = $2)`,
-		businessID, ownerID).Scan(&ok)
+		`SELECT $1::uuid IN `+ownerOf, businessID, ownerID).Scan(&ok)
 	return ok, err
 }
 
@@ -24,7 +27,7 @@ func (s *Store) OwnsEmployee(ctx context.Context, ownerID, employeeID string) (b
 		`SELECT EXISTS(
 		    SELECT 1 FROM memberships m
 		      JOIN businesses b ON b.id = m.business_id
-		     WHERE m.user_id = $1 AND m.role IN ('owner','employee') AND b.owner_user_id = $2)`,
+		     WHERE m.user_id = $1 AND m.role IN ('owner','employee') AND b.id IN `+ownerOf+`)`,
 		employeeID, ownerID).Scan(&ok)
 	return ok, err
 }
@@ -36,6 +39,10 @@ type RosterEntry struct {
 	Username         string `json:"username"`
 	DisplayName      string `json:"display_name"`
 	Role             string `json:"role"` // 'owner' (self) | 'employee'
+	DepartmentID     string `json:"department_id"`
+	DepartmentName   string `json:"department_name"`
+	JobTitle         string `json:"job_title"`
+	AvatarURL        string `json:"avatar_url"`
 	LastSeen         *int64 `json:"last_seen"` // unix seconds (the web UI expects a number)
 	ActiveTodayS     int64  `json:"active_today_s"`
 	ActiveYesterdayS int64  `json:"active_yesterday_s"`
@@ -50,10 +57,13 @@ type RosterEntry struct {
 // Roster returns a business's employees with last-seen, active seconds and
 // screenshot/keystroke rollups for the [dayStart, dayEnd) window plus the
 // preceding day (for the dashboard's vs-yesterday deltas).
-func (s *Store) Roster(ctx context.Context, businessID string, dayStart, dayEnd int64) ([]RosterEntry, error) {
+// departmentID optionally narrows the roster to one Org&Emp department ("" = all).
+func (s *Store) Roster(ctx context.Context, businessID string, dayStart, dayEnd int64, departmentID string) ([]RosterEntry, error) {
 	ydayStart := dayStart - 86400
 	rows, err := s.pool.Query(ctx, `
 		SELECT u.id, COALESCE(u.email, ''), COALESCE(u.username, ''), u.display_name, m.role,
+		       COALESCE(m.department_id, ''), COALESCE(m.department_name, ''),
+		       COALESCE(m.job_title, ''), COALESCE(u.avatar_url, ''),
 		       (SELECT extract(epoch FROM max(last_seen_at))::bigint
 		          FROM devices d WHERE d.user_id = u.id) AS last_seen,
 		       COALESCE((SELECT sum(duration_s) FROM activity_samples a
@@ -73,8 +83,9 @@ func (s *Store) Roster(ctx context.Context, businessID string, dayStart, dayEnd 
 		           AND k.ts_bucket >= $2 AND k.ts_bucket < $3 AND k.count > 0) AS key_minutes
 		  FROM memberships m
 		  JOIN users u ON u.id = m.user_id
-		 WHERE m.business_id = $1 AND m.role IN ('owner','employee')
-		 ORDER BY (m.role = 'owner') DESC, u.display_name`, businessID, dayStart, dayEnd, ydayStart)
+		 WHERE m.business_id = $1 AND m.role IN ('owner','employee') AND m.deactivated_at IS NULL
+		   AND ($5 = '' OR m.department_id = $5)
+		 ORDER BY (m.role = 'owner') DESC, u.display_name`, businessID, dayStart, dayEnd, ydayStart, departmentID)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +95,8 @@ func (s *Store) Roster(ctx context.Context, businessID string, dayStart, dayEnd 
 	for rows.Next() {
 		var e RosterEntry
 		var keyMinutes int64
-		if err := rows.Scan(&e.ID, &e.Email, &e.Username, &e.DisplayName, &e.Role, &e.LastSeen,
+		if err := rows.Scan(&e.ID, &e.Email, &e.Username, &e.DisplayName, &e.Role,
+			&e.DepartmentID, &e.DepartmentName, &e.JobTitle, &e.AvatarURL, &e.LastSeen,
 			&e.ActiveTodayS, &e.ActiveYesterdayS, &e.ScreenshotsToday, &e.ScreenshotsYday, &keyMinutes); err != nil {
 			return nil, err
 		}
@@ -102,7 +114,7 @@ func (s *Store) Roster(ctx context.Context, businessID string, dayStart, dayEnd 
 
 // All per-employee reads are scoped to businesses the caller owns via this filter,
 // so an owner can never read another business's data.
-const ownedFilter = `business_id IN (SELECT id FROM businesses WHERE owner_user_id = $2)`
+const ownedFilter = `business_id IN ` + ownerOf
 
 // ActivitySample is one app-usage interval in a report.
 type ActivitySample struct {
@@ -262,7 +274,7 @@ func (s *Store) ScreenshotPathForOwner(ctx context.Context, ownerID, clientUUID 
 	err := s.pool.QueryRow(ctx,
 		`SELECT s.file_path FROM screenshots s
 		   JOIN businesses b ON b.id = s.business_id
-		  WHERE s.client_uuid = $1 AND b.owner_user_id = $2`,
+		  WHERE s.client_uuid = $1 AND b.id IN `+ownerOf,
 		clientUUID, ownerID).Scan(&path)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return "", ErrNotFound

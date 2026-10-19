@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { fileURLToPath, URL } from "node:url";
 
 // Web admin SPA. Talks to the Go backend (default http://localhost:8090).
 // Override the API base with VITE_API_BASE. The dev proxy below forwards
@@ -13,6 +14,9 @@ export default defineConfig({
   // Served under /admin in production (the marketing site owns "/").
   base: "/admin/",
   plugins: [react()],
+  resolve: {
+    alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) },
+  },
   server: {
     port: 5174,
     proxy: {

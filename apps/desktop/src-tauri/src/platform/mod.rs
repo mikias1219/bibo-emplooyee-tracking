@@ -23,6 +23,11 @@ mod windows;
 #[cfg(target_os = "windows")]
 pub use windows::*;
 
+#[cfg(target_os = "linux")]
+mod linux;
+#[cfg(target_os = "linux")]
+pub use linux::*;
+
 // ---------- shared types ----------
 
 /// Permission state reported to the UI (see docs/03-macos-permissions.md). On
@@ -34,6 +39,7 @@ pub enum PermissionState {
     Denied,
     /// Granted by the OS but a tracker still can't use it — usually needs an app
     /// relaunch (e.g. the event tap). Surfaced by the trackers, not this module.
+    #[cfg_attr(target_os = "linux", allow(dead_code))]
     NeedsRestart,
 }
 
@@ -92,7 +98,9 @@ pub static KEY_PRESS_COUNT: std::sync::atomic::AtomicU64 = std::sync::atomic::At
 // ---------- cross-platform implementations ----------
 
 /// The active foreground window, or `None` if there isn't one / it can't be read.
-/// `active-win-pos-rs` is cross-platform (macOS + Windows), so this lives here.
+/// `active-win-pos-rs` is cross-platform (macOS + Windows), so this lives here;
+/// Linux has its own (Wayland needs the GNOME Shell extension).
+#[cfg(not(target_os = "linux"))]
 pub fn active_window() -> Option<ActiveWindowInfo> {
     match active_win_pos_rs::get_active_window() {
         Ok(w) => {

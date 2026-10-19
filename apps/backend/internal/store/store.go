@@ -36,51 +36,6 @@ type User struct {
 	AccountType string // 'manager' | 'parent' (default 'manager')
 }
 
-// CreateUser inserts a user with the given argon2id hash. email/username are
-// lowercased; pass "" for whichever is unused (at least one must be set, enforced
-// by the caller + a DB CHECK). accountType selects the persona ('manager' |
-// 'parent'); pass "" to default to 'manager'. Returns ErrConflict on a duplicate
-// email or username.
-func (s *Store) CreateUser(ctx context.Context, email, username, passwordHash, displayName, accountType string) (User, error) {
-	if accountType == "" {
-		accountType = "manager"
-	}
-	var u User
-	err := s.pool.QueryRow(ctx,
-		`INSERT INTO users (email, username, password_hash, display_name, account_type)
-		 VALUES ($1, $2, $3, $4, $5)
-		 RETURNING id, COALESCE(email, ''), COALESCE(username, ''), display_name, account_type`,
-		nullableLower(email), nullableLower(username), passwordHash, displayName, accountType,
-	).Scan(&u.ID, &u.Email, &u.Username, &u.DisplayName, &u.AccountType)
-	if isUniqueViolation(err) {
-		return User{}, ErrConflict
-	}
-	if err != nil {
-		return User{}, err
-	}
-	return u, nil
-}
-
-// GetUserByIdentifier returns the user and its password hash for login. The
-// identifier matches either the email or the username (both stored lowercased).
-func (s *Store) GetUserByIdentifier(ctx context.Context, identifier string) (User, string, error) {
-	identifier = normalizeEmail(identifier) // lowercase + trim; usernames are lowercased too
-	var u User
-	var hash string
-	err := s.pool.QueryRow(ctx,
-		`SELECT id, COALESCE(email, ''), COALESCE(username, ''), display_name, account_type, password_hash
-		   FROM users WHERE email = $1 OR username = $1`,
-		identifier,
-	).Scan(&u.ID, &u.Email, &u.Username, &u.DisplayName, &u.AccountType, &hash)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return User{}, "", ErrNotFound
-	}
-	if err != nil {
-		return User{}, "", err
-	}
-	return u, hash, nil
-}
-
 // GetUserByID returns the user by id (without the password hash).
 func (s *Store) GetUserByID(ctx context.Context, id string) (User, error) {
 	var u User
@@ -100,14 +55,10 @@ func (s *Store) GetUserByID(ctx context.Context, id string) (User, error) {
 func (s *Store) IsMember(ctx context.Context, userID, businessID string) (bool, error) {
 	var exists bool
 	err := s.pool.QueryRow(ctx,
-		`SELECT EXISTS(SELECT 1 FROM memberships WHERE user_id = $1 AND business_id = $2)`,
+		`SELECT EXISTS(SELECT 1 FROM memberships WHERE user_id = $1 AND business_id = $2 AND deactivated_at IS NULL)`,
 		userID, businessID,
 	).Scan(&exists)
 	return exists, err
-}
-
-func normalizeEmail(email string) string {
-	return strings.ToLower(strings.TrimSpace(email))
 }
 
 // nullableLower lowercases/trims an identifier, returning nil (SQL NULL) when blank

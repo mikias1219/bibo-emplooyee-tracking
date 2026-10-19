@@ -19,8 +19,8 @@ use super::client::BackendClient;
 use super::BATCH_LIMIT;
 use crate::storage::{Db, SyncTable};
 
-/// Base interval between sync passes (5 min). Backoff multiplies this on failure.
-const BASE_INTERVAL: Duration = Duration::from_secs(300);
+/// Base interval between sync passes (1 min). Backoff multiplies this on failure.
+const BASE_INTERVAL: Duration = Duration::from_secs(60);
 /// Cap the backoff so we still retry roughly every 16 min when the backend is down.
 const MAX_INTERVAL: Duration = Duration::from_secs(16 * 60);
 /// Short delay before the first pass so startup isn't blocked.

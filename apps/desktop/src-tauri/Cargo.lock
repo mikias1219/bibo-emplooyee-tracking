@@ -954,6 +954,7 @@ dependencies = [
  "webp",
  "windows 0.58.0",
  "xcap",
+ "zbus",
 ]
 
 [[package]]

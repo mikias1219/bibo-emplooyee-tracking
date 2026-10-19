@@ -4,7 +4,7 @@
     "loadingBusinesses": "Loading businesses…",
     "loadingRoster": "Loading roster…",
     "errorRoster": "Could not load the roster.",
-    "noBusinesses": "No businesses yet. Go to <0>{{members}}</0> to add your first {{member}} — a business is created automatically.",
+    "noBusinesses": "You don't manage any workspace. Only your organization's owners and admins can use this dashboard.",
     "noActivity": "No {{members}} have synced activity yet.",
     "selfBadge": "You",
     "view": "View",
@@ -21,47 +21,26 @@
     "statScreenshots": "Screenshots",
     "vsYesterday": "vs yesterday",
     "ofMembers": "of {{count}} {{members}}",
-    "todayLabel": "today",
-    "newTeam": "New team"
+    "todayLabel": "today"
   },
   "employees": {
-    "newBusiness": "New business",
-    "newOrg": "New {{org}}",
     "loading": "Loading…",
     "loadingMembers": "Loading {{members}}…",
     "errorLoadMembers": "Could not load {{members}}.",
-    "noBusinessNotice": "You don't own a business yet. Adding your first {{member}} will automatically create one (<1>\"&lt;your name&gt;'s Team\"</1>). You can also create one explicitly with \"New business\".",
-    "rosterFor": "Roster for <0>{{name}}</0>",
-    "noMembersYet": "No {{members}} in this business yet.",
-    "autoCreatedNote": "No business existed, so a default one was created automatically and your {{member}} was added to it.",
+    "noBusinessNotice": "Only your organization's owners and admins can manage this workspace. Sign in with an owner or admin account from your Selamnew organization.",
+    "noMembersYet": "No {{members}} found in your organization directory yet. Use “Sync from directory” to refresh.",
     "viewReports": "View reports",
     "table": {
       "name": "Name",
-      "login": "Login"
-    }
-  },
-  "newBusinessModal": {
-    "title": "New business",
-    "nameLabel": "Business name",
-    "orgNameLabel": "{{org}} name",
-    "namePlaceholder": "e.g. Acme Studio",
-    "namePlaceholderFamily": "e.g. The Tran Family",
-    "cancel": "Cancel",
-    "create": "Create",
-    "creating": "Creating…",
-    "errorCreate": "Could not create business."
-  },
-  "newEmployeeModal": {
-    "noBusinessSelected": "No business selected — a default one will be created automatically for this {{member}}.",
-    "displayName": "Display name",
-    "usernameOrEmail": "Username or email",
-    "temporaryPassword": "Temporary password",
-    "shareCredentials": "Share these credentials with the {{member}}; they sign in from the desktop app's login picker.",
-    "cancel": "Cancel",
-    "adding": "Adding…",
-    "generate": "Generate",
-    "errorTaken": "That email or username is already taken.",
-    "errorCreate": "Could not create {{member}}."
+      "login": "Email",
+      "department": "Department"
+    },
+    "directoryNote": "People, departments and roles come from your Selamnew organization directory (Org&Emp). Add or remove people there; this list stays in sync automatically.",
+    "syncDirectory": "Sync from directory",
+    "syncing": "Syncing…",
+    "synced": "Directory synced — {{count}} people.",
+    "syncFailed": "Could not sync the directory.",
+    "allDepartments": "All departments"
   },
   "detail": {
     "breadcrumbDashboard": "Dashboard",

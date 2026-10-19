@@ -1,0 +1,78 @@
+{
+  "title": "Kinerja",
+  "subtitle": "Waktu produktif tim Anda, berdasarkan cara Anda mengelompokkan aplikasi dan situs web.",
+  "tabs": {
+    "report": "Laporan",
+    "rules": "Aturan produktivitas"
+  },
+  "period": {
+    "label": "Periode",
+    "last7": "7 hari terakhir",
+    "last30": "30 hari terakhir",
+    "custom": "Kustom",
+    "from": "Dari",
+    "to": "Sampai"
+  },
+  "category": {
+    "productive": "Produktif",
+    "neutral": "Netral",
+    "unproductive": "Tidak produktif",
+    "unclassified": "Belum diklasifikasi"
+  },
+  "report": {
+    "loading": "Memuat kinerja…",
+    "error": "Tidak dapat memuat data kinerja.",
+    "errorRange": "Tanggal mulai harus sebelum tanggal akhir.",
+    "score": "Skor produktivitas",
+    "scoreSub": "Porsi produktif dari waktu yang diklasifikasi",
+    "productiveTime": "Waktu produktif",
+    "ofActive": "dari {{active}} aktif",
+    "target": "Target harian tercapai",
+    "targetSub": "Target {{target}} per hari kerja",
+    "coverage": "Waktu terklasifikasi",
+    "coverageSub": "Porsi waktu aktif yang memiliki aturan",
+    "lowCoverage": "Hanya {{pct}}% waktu aktif yang diklasifikasi, jadi skor mungkin kurang akurat.",
+    "classifyNow": "Klasifikasikan aplikasi dan situs web",
+    "byDay": "Waktu tim per hari",
+    "top": "Paling produktif",
+    "least": "Paling tidak produktif",
+    "noRank": "Tidak ada aktivitas pada periode ini.",
+    "empty": "Belum ada {{members}}.",
+    "disclaimer": "Skor menunjukkan penggunaan waktu di aplikasi dan situs web yang sudah diklasifikasi. Skor tidak mengukur kualitas kerja dan tidak boleh menjadi satu-satunya dasar keputusan tentang orang."
+  },
+  "table": {
+    "name": "Nama",
+    "breakdown": "Rincian",
+    "active": "Aktif",
+    "productive": "Produktif",
+    "score": "Skor",
+    "target": "Target",
+    "view": "Lihat"
+  },
+  "rules": {
+    "subtitle": "Tandai aplikasi dan situs web yang dipakai tim Anda sebagai produktif, netral, atau tidak produktif.",
+    "target": "Target produktif harian",
+    "targetHelp": "Waktu produktif yang diharapkan per hari kerja. Dipakai untuk \"Target harian tercapai\".",
+    "hoursPerDay": "jam / hari",
+    "save": "Simpan",
+    "targetSaved": "Target disimpan.",
+    "targetInvalid": "Masukkan jumlah jam antara 1 dan 24.",
+    "apps": "Aplikasi",
+    "websites": "Situs web",
+    "showAll": "Semua",
+    "showUnclassified": "Belum diklasifikasi ({{count}})",
+    "addAppPlaceholder": "Tambahkan aplikasi berdasarkan nama, mis. Visual Studio Code",
+    "addDomainPlaceholder": "Tambahkan situs web, mis. github.com",
+    "add": "Tambahkan sebagai produktif",
+    "loading": "Memuat aplikasi dan situs web…",
+    "empty": "Tidak ada yang terlacak pada periode ini.",
+    "error": "Tidak dapat memuat aturan produktivitas.",
+    "saveError": "Tidak dapat menyimpan. Silakan coba lagi.",
+    "colApp": "Aplikasi",
+    "colDomain": "Situs web",
+    "colTime": "Waktu dalam periode",
+    "colCategory": "Kategori",
+    "appHelp": "Waktu browser dibagi menurut situs web yang dikunjungi, jadi klasifikasikan situs web juga, bukan hanya aplikasi. Waktu yang belum diklasifikasi tidak pernah dihitung sebagai tidak produktif.",
+    "domainHelp": "Aturan untuk sebuah domain juga berlaku untuk subdomainnya: \"google.com\" mencakup \"mail.google.com\" kecuali subdomain itu punya aturan sendiri."
+  }
+}

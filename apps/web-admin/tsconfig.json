@@ -14,6 +14,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    /* "@/x" → src/x (feature-based layout; see src/README.md) */
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,

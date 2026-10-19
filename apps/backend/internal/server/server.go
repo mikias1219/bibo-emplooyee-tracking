@@ -13,6 +13,7 @@ import (
 	"ctracking/backend/internal/handlers"
 	"ctracking/backend/internal/middleware"
 	"ctracking/backend/internal/obs"
+	"ctracking/backend/internal/orgauth"
 	"ctracking/backend/internal/retention"
 	"ctracking/backend/internal/store"
 
@@ -22,7 +23,7 @@ import (
 
 // New builds the Gin engine with all routes registered. The store, file store, and
 // retention service are shared with the caller (which also runs the retention sweeper).
-func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *retention.Service) *gin.Engine {
+func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *retention.Service, org *orgauth.Service) *gin.Engine {
 	// Route gin's own output (access logs, route table, debug warnings) into the same
 	// captured stream as obs/log so every line lands in the log file too.
 	gin.DefaultWriter = obs.Writer()
@@ -40,11 +41,12 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 	r.GET("/healthz", handlers.Health)
 
 	tok := auth.NewManager(cfg.JWTSecret)
-	authH := handlers.NewAuthHandler(st, tok, cfg.SuperAdmins)
-	ownerH := handlers.NewOwnerHandler(st)
+	authH := handlers.NewAuthHandler(st, tok, org, cfg.SuperAdmins)
+	ownerH := handlers.NewOwnerHandler(st, org)
 	syncH := handlers.NewSyncHandler(st)
 	shotH := handlers.NewScreenshotHandler(st, files)
 	reportsH := handlers.NewReportsHandler(st, files)
+	productivityH := handlers.NewProductivityHandler(st)
 	retentionH := handlers.NewRetentionHandler(st, ret)
 	downloadsH := handlers.NewDownloadsHandler(st, cfg.StaticDir)
 	keepaliveH := handlers.NewKeepaliveHandler(cfg.KeepaliveToken)
@@ -74,9 +76,10 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 
 	// Auth endpoints, rate-limited to throttle credential guessing.
 	a := v1.Group("/auth", middleware.LoginRateLimit())
-	a.POST("/register", authH.Register)
 	a.POST("/login", authH.Login)
 	a.POST("/refresh", authH.Refresh)
+	// SSO: exchange a Firebase ID token from another Selamnew app.
+	a.POST("/firebase", authH.FirebaseLogin)
 
 	// Protected routes. Owner/sync/report routes register under this group in
 	// later tasks.
@@ -84,12 +87,12 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 	authed.GET("/me", authH.Me)
 
 	// Owner: business + employee management.
-	authed.POST("/businesses", ownerH.CreateBusiness)
 	authed.GET("/businesses/mine", ownerH.ListMine)
 	authed.GET("/businesses/:id/employees", ownerH.ListEmployees)
+	authed.GET("/businesses/:id/departments", ownerH.Departments)
+	authed.POST("/businesses/:id/directory/sync", ownerH.SyncDirectory)
 	authed.PATCH("/businesses/:id/settings", ownerH.UpdateSettings)
 	authed.POST("/businesses/:id/screenshots/cleanup", retentionH.Cleanup)
-	authed.POST("/employees", ownerH.CreateEmployee)
 
 	// Capture policy for the desktop (employee's org settings).
 	authed.GET("/policy", ownerH.Policy)
@@ -119,6 +122,13 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 	authed.GET("/reports/employees/:id/browser", reportsH.Browser)
 	authed.GET("/reports/employees/:id/screenshots", reportsH.Screenshots)
 	authed.GET("/screenshots/:client_uuid", reportsH.ScreenshotImage)
+
+	// Productivity rules + performance reports (owner only).
+	authed.GET("/businesses/:id/productivity/rules", productivityH.ListRules)
+	authed.PUT("/businesses/:id/productivity/rules", productivityH.SetRule)
+	authed.DELETE("/businesses/:id/productivity/rules/:ruleId", productivityH.DeleteRule)
+	authed.GET("/businesses/:id/productivity/usage", productivityH.Usage)
+	authed.GET("/businesses/:id/performance", productivityH.Performance)
 
 	// Serve static content (same origin as the API) when configured:
 	//   /         → marketing landing page (dir/index.html)

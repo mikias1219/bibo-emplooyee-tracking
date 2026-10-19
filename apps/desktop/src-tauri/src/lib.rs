@@ -72,7 +72,6 @@ pub fn run() {
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
-            commands::ping,
             commands::track_event,
 
             commands::set_paused,
@@ -95,8 +94,6 @@ pub fn run() {
             commands::request_accessibility,
             commands::capture_now,
             commands::browser_link,
-            commands::signup_url,
-            commands::admin_url,
             commands::admin_businesses,
             commands::admin_roster,
             commands::admin_employee_activity,
@@ -104,8 +101,7 @@ pub fn run() {
             commands::admin_employee_browser,
             commands::admin_employee_screenshots,
             commands::admin_screenshot_data,
-            commands::admin_create_business,
-            commands::admin_create_employee,
+            commands::admin_sync_directory,
             commands::login,
             commands::logout,
             commands::current_session,

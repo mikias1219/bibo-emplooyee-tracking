@@ -12,9 +12,8 @@
       "desc": "Sign in to sync with your team or family workspace.",
       "signIn": "Sign in"
     },
-    "needAccount": "Need an account?",
-    "signupLink": "Sign up",
-    "adminLink": "Open the admin dashboard"
+    "adminLink": "Open the admin dashboard",
+    "orgAccount": "Use your Selamnew organization account — the same one as Operation and Collaboration."
   },
   "tray": {
     "status": "Status",

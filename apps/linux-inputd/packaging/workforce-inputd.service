@@ -1,0 +1,22 @@
+[Unit]
+Description=Workforce Intelligence input helper (NOT ENABLE UNTIL SECURITY REVIEW)
+After=systemd-logind.service
+[Service]
+Type=simple
+ExecStart=/usr/libexec/workforce-inputd
+# Socket is created 0660; grant access with an administrator-managed group.
+User=root
+Group=root
+RuntimeDirectory=workforce-inputd
+RuntimeDirectoryMode=0750
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+IPAddressDeny=any
+RestrictAddressFamilies=AF_UNIX
+# Deliberately NO DeviceAllow yet. Device collection is disabled in prototype.
+# TODO: peer UID authorization, logind active seat, consent grant verification,
+# udev allowlist, revoke tests, device access and sandbox before enabling.
+[Install]
+WantedBy=multi-user.target

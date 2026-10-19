@@ -4,7 +4,6 @@
     "loadingBusinesses": "Cargando empresas…",
     "loadingRoster": "Cargando lista…",
     "errorRoster": "No se pudo cargar la lista.",
-    "noBusinesses": "Aún no hay empresas. Vaya a <0>{{members}}</0> para añadir su primer {{member}} — la empresa se crea automáticamente.",
     "noActivity": "Aún ningún {{members}} ha sincronizado actividad.",
     "selfBadge": "Usted",
     "view": "Ver",
@@ -21,47 +20,16 @@
     "statScreenshots": "Capturas",
     "vsYesterday": "vs ayer",
     "ofMembers": "de {{count}} {{members}}",
-    "todayLabel": "hoy",
-    "newTeam": "Nuevo equipo"
+    "todayLabel": "hoy"
   },
   "employees": {
-    "newBusiness": "Nueva empresa",
-    "newOrg": "Crear {{org}}",
     "loading": "Cargando…",
     "loadingMembers": "Cargando {{members}}…",
     "errorLoadMembers": "No se pudo cargar {{members}}.",
-    "noBusinessNotice": "Aún no posee ninguna empresa. Al añadir su primer {{member}} se creará una automáticamente (<1>«Equipo de &lt;su nombre&gt;»</1>). También puede crear una explícitamente con «Nueva empresa».",
-    "rosterFor": "Lista de <0>{{name}}</0>",
-    "noMembersYet": "Aún no hay {{members}} en esta empresa.",
-    "autoCreatedNote": "No existía ninguna empresa, por lo que se creó una predeterminada automáticamente y se añadió su {{member}} a ella.",
     "viewReports": "Ver informes",
     "table": {
-      "name": "Nombre",
-      "login": "Acceso"
+      "name": "Nombre"
     }
-  },
-  "newBusinessModal": {
-    "title": "Nueva empresa",
-    "nameLabel": "Nombre de la empresa",
-    "orgNameLabel": "Nombre de {{org}}",
-    "namePlaceholder": "p. ej. Acme Studio",
-    "namePlaceholderFamily": "p. ej. Familia Tran",
-    "cancel": "Cancelar",
-    "create": "Crear",
-    "creating": "Creando…",
-    "errorCreate": "No se pudo crear la empresa."
-  },
-  "newEmployeeModal": {
-    "noBusinessSelected": "No se ha seleccionado ninguna empresa — se creará una predeterminada automáticamente para este {{member}}.",
-    "displayName": "Nombre para mostrar",
-    "usernameOrEmail": "Nombre de usuario o correo",
-    "temporaryPassword": "Contraseña temporal",
-    "shareCredentials": "Comparta estas credenciales con el {{member}}; inicia sesión desde el selector de acceso de la aplicación de escritorio.",
-    "cancel": "Cancelar",
-    "adding": "Añadiendo…",
-    "generate": "Generar",
-    "errorTaken": "Ese correo o nombre de usuario ya está en uso.",
-    "errorCreate": "No se pudo crear el {{member}}."
   },
   "detail": {
     "breadcrumbDashboard": "Panel",

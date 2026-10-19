@@ -12,8 +12,6 @@
       "desc": "Inicia sesión para sincronizar con el espacio de tu equipo o familia.",
       "signIn": "Iniciar sesión"
     },
-    "needAccount": "¿Necesitas una cuenta?",
-    "signupLink": "Regístrate",
     "adminLink": "Abrir el panel de administración"
   },
   "tray": {

@@ -5,7 +5,8 @@
     "dashboard": "Bảng điều khiển",
     "employees": "Nhân viên",
     "settings": "Cài đặt",
-    "messages": "Thông báo"
+    "messages": "Thông báo",
+    "performance": "Hiệu suất"
   },
   "actions": {
     "signIn": "Đăng nhập",

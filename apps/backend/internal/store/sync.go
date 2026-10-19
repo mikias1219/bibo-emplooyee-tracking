@@ -59,7 +59,14 @@ func (s *Store) ResolveBusinessForUser(ctx context.Context, userID string, expli
 		return *explicit, nil
 	}
 
-	rows, err := s.pool.Query(ctx, `SELECT business_id FROM memberships WHERE user_id = $1`, userID)
+	// Deactivated (left the org) memberships never receive data. When a linked
+	// legacy account still has a self-serve business, the org business wins.
+	rows, err := s.pool.Query(ctx, `
+		SELECT m.business_id FROM memberships m JOIN businesses b ON b.id = m.business_id
+		 WHERE m.user_id = $1 AND m.deactivated_at IS NULL
+		   AND (b.tenant_id IS NOT NULL OR NOT EXISTS (
+		        SELECT 1 FROM memberships m2 JOIN businesses b2 ON b2.id = m2.business_id
+		         WHERE m2.user_id = $1 AND m2.deactivated_at IS NULL AND b2.tenant_id IS NOT NULL))`, userID)
 	if err != nil {
 		return "", err
 	}

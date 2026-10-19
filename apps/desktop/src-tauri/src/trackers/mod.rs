@@ -514,6 +514,14 @@ pub fn start_screenshots(db: Arc<Db>, control: Arc<TrackerControl>, dir: std::pa
         if permission_status(Permission::ScreenRecording) != PermissionState::Granted {
             continue;
         }
+        // Linux/Wayland captures the whole screen: only while active and with a
+        // known focused app, so the skip-list can't be bypassed.
+        #[cfg(target_os = "linux")]
+        if !crate::platform::screenshot_tick_allowed(
+            control.idle_threshold_s.load(Ordering::Relaxed) as f64,
+        ) {
+            continue;
+        }
         capture_once(&db, &dir, &control);
     });
 }

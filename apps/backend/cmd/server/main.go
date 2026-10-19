@@ -14,7 +14,10 @@ import (
 	"ctracking/backend/internal/config"
 	"ctracking/backend/internal/db"
 	"ctracking/backend/internal/filestore"
+	"ctracking/backend/internal/identity"
 	"ctracking/backend/internal/obs"
+	"ctracking/backend/internal/orgauth"
+	"ctracking/backend/internal/orgemp"
 	"ctracking/backend/internal/retention"
 	"ctracking/backend/internal/server"
 	"ctracking/backend/internal/store"
@@ -76,9 +79,21 @@ func main() {
 	defer stopSweeper()
 	ret.StartSweeper(sweepCtx, time.Hour)
 
+	// Selamnew identity: Firebase verifies credentials, Org&Emp owns users/orgs/departments.
+	dec, err := orgemp.NewDecrypter(cfg.EncryptionKey, cfg.EncryptionIV, cfg.EncryptionSalt)
+	if err != nil {
+		log.Fatalf("org&emp encryption: %v", err)
+	}
+	org := orgauth.New(
+		identity.NewFirebase(cfg.FirebaseAPIKey, cfg.FirebaseProjectID),
+		orgemp.New(cfg.OrgEmpBaseURL, dec),
+		st, cfg.OwnerRoleSlugs, cfg.OwnerEmails, cfg.OrgServiceToken,
+	)
+	org.StartSweeper(sweepCtx, time.Duration(cfg.DirectorySyncMins)*time.Minute)
+
 	srv := &http.Server{
 		Addr:    ":" + cfg.Port,
-		Handler: server.New(cfg, st, files, ret),
+		Handler: server.New(cfg, st, files, ret, org),
 	}
 
 	go func() {

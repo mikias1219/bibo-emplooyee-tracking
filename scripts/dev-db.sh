@@ -10,7 +10,7 @@
 set -euo pipefail
 
 NAME=ctracking-dev-db
-PORT=5432
+PORT="${PG_PORT:-5432}"
 # Per-env databases created alongside the default `ctracking` (the container's
 # POSTGRES_DB). Keep in sync with the apps/backend/.env*.example files.
 ENV_DBS=(ctracking_staging ctracking_prod)

@@ -5,7 +5,8 @@
     "dashboard": "Dashboard",
     "employees": "Employees",
     "settings": "Settings",
-    "messages": "Messages"
+    "messages": "Messages",
+    "performance": "Performance"
   },
   "actions": {
     "signIn": "Sign in",

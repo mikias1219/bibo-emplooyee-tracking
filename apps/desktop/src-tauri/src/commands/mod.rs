@@ -14,13 +14,6 @@ use crate::platform::{self, CapabilityRow, Permission};
 use crate::storage::Db;
 use crate::trackers::TrackerControl;
 
-/// Temporary smoke-test command kept from the scaffold; remove once real
-/// commands exist (task 9+).
-#[tauri::command]
-pub fn ping() -> String {
-    "ctracking: ok".to_string()
-}
-
 /// Pause or resume all tracking. Routed through the tray helper so the menu bar
 /// indicator and the dashboard pill stay in sync.
 #[tauri::command]
@@ -434,20 +427,6 @@ fn backend_url() -> String {
     crate::settings::backend_base_url()
 }
 
-/// The web signup wizard URL, opened in the system browser from the desktop
-/// welcome/login screens. The web admin is served under `/admin` on the backend.
-#[tauri::command]
-pub fn signup_url() -> String {
-    format!("{}/admin/signup", backend_url().trim_end_matches('/'))
-}
-
-/// The web admin dashboard URL. Opened in the system browser from the native
-/// Admin section (workspace creation, employee detail). Served under `/admin`.
-#[tauri::command]
-pub fn admin_url() -> String {
-    format!("{}/admin/", backend_url().trim_end_matches('/'))
-}
-
 /// Workspaces owned by the signed-in user (`GET /v1/businesses/mine`). Uses the
 /// tracker's own session token; an empty list means the user isn't an owner, so
 /// the Admin section shows the "no access" state.
@@ -543,38 +522,15 @@ pub async fn admin_screenshot_data(
     Ok(format!("data:{content_type};base64,{b64}"))
 }
 
-/// Create a new workspace (team/family) owned by the caller. Kind is decided
-/// server-side from the owner's account type.
+/// Refresh an owned workspace's members from the Selamnew Org&Emp directory
+/// (`POST /v1/businesses/{id}/directory/sync`). Returns the active member count.
 #[tauri::command]
-pub async fn admin_create_business(
-    name: String,
-    auth: State<'_, Arc<AuthState>>,
-) -> Result<crate::sync::client::OwnerBusiness, String> {
-    let client = BackendClient::new(backend_url(), auth.inner().clone());
-    client.owner_create_business(&name).await
-}
-
-/// Create (pre-provision) a member in an owned workspace. Exactly one of
-/// `email` / `username` is expected; the UI picks based on the entered login.
-#[tauri::command]
-pub async fn admin_create_employee(
+pub async fn admin_sync_directory(
     business_id: String,
-    display_name: String,
-    email: Option<String>,
-    username: Option<String>,
-    password: String,
     auth: State<'_, Arc<AuthState>>,
-) -> Result<crate::sync::client::CreatedEmployee, String> {
+) -> Result<i64, String> {
     let client = BackendClient::new(backend_url(), auth.inner().clone());
-    client
-        .owner_create_employee(
-            &business_id,
-            &display_name,
-            email.as_deref(),
-            username.as_deref(),
-            &password,
-        )
-        .await
+    client.owner_sync_directory(&business_id).await
 }
 
 /// In-app messages (ticket 145) for the signed-in user, resolved to `locale`.

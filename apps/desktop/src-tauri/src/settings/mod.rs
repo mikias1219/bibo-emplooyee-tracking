@@ -174,9 +174,9 @@ pub fn apply(s: &Settings, control: &crate::trackers::TrackerControl) {
         .store(crate::trackers::shot_mode_from_str(&s.screenshot_mode), Relaxed);
     *control.screenshot_skip_apps.write().unwrap() = s.screenshot_skip_apps.clone();
 
-    // Capture opt-outs. On Windows nothing captures until the user has consented
-    // (there are no per-feature OS prompts); macOS relies on TCC and ignores consent.
-    let consent_ok = !cfg!(target_os = "windows") || s.consented;
+    // Capture opt-outs. On Windows and Linux nothing captures until the user has
+    // consented (there are no per-feature OS prompts); macOS relies on TCC.
+    let consent_ok = cfg!(target_os = "macos") || s.consented;
     control
         .capture_screenshots
         .store(s.capture_screenshots && consent_ok, Relaxed);

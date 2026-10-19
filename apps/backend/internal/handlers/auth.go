@@ -6,127 +6,112 @@ import (
 	"strings"
 
 	"ctracking/backend/internal/auth"
+	"ctracking/backend/internal/identity"
 	"ctracking/backend/internal/obs"
+	"ctracking/backend/internal/orgauth"
 	"ctracking/backend/internal/store"
 
 	"github.com/gin-gonic/gin"
 )
 
-// AuthHandler serves registration, login, refresh, and the public picker.
+// AuthHandler serves organization sign-in, token refresh and /me.
 type AuthHandler struct {
 	store  *store.Store
 	tok    *auth.Manager
+	org    *orgauth.Service
 	admins []string // SUPER_ADMINS, surfaced as is_super_admin on the user
 }
 
 // NewAuthHandler wires the auth handler.
-func NewAuthHandler(s *store.Store, tok *auth.Manager, admins []string) *AuthHandler {
-	return &AuthHandler{store: s, tok: tok, admins: admins}
-}
-
-type registerReq struct {
-	Email       string `json:"email"`    // optional if username is set
-	Username    string `json:"username"` // optional if email is set
-	Password    string `json:"password"`
-	DisplayName string `json:"display_name"`
-	AccountType string `json:"account_type"` // 'manager' (default) | 'parent'
-}
-
-// Register creates a new account (any user can be an owner) and returns tokens.
-func (h *AuthHandler) Register(c *gin.Context) {
-	var req registerReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		badRequest(c, "invalid body")
-		return
-	}
-	req.Email = strings.TrimSpace(req.Email)
-	req.Username = strings.ToLower(strings.TrimSpace(req.Username))
-	req.DisplayName = strings.TrimSpace(req.DisplayName)
-	if req.DisplayName == "" {
-		badRequest(c, "display_name is required")
-		return
-	}
-	if req.Email == "" && req.Username == "" {
-		badRequest(c, "an email or username is required")
-		return
-	}
-	if req.Username != "" && !usernameRe.MatchString(req.Username) {
-		badRequest(c, "username must be 3-32 chars: lowercase letters, digits, underscores")
-		return
-	}
-	if len(req.Password) < 8 {
-		badRequest(c, "password must be at least 8 characters")
-		return
-	}
-	if req.AccountType == "" {
-		req.AccountType = "manager"
-	}
-	if req.AccountType != "manager" && req.AccountType != "parent" {
-		badRequest(c, "account_type must be 'manager' or 'parent'")
-		return
-	}
-
-	hash, err := auth.HashPassword(req.Password)
-	if err != nil {
-		serverError(c, err)
-		return
-	}
-	u, err := h.store.CreateUser(c.Request.Context(), req.Email, req.Username, hash, req.DisplayName, req.AccountType)
-	if errors.Is(err, store.ErrConflict) {
-		c.JSON(http.StatusConflict, gin.H{"error": "that email or username is already taken"})
-		return
-	}
-	if err != nil {
-		serverError(c, err)
-		return
-	}
-	h.issue(c, http.StatusCreated, u)
+func NewAuthHandler(s *store.Store, tok *auth.Manager, org *orgauth.Service, admins []string) *AuthHandler {
+	return &AuthHandler{store: s, tok: tok, org: org, admins: admins}
 }
 
 type loginReq struct {
-	Identifier string `json:"identifier"` // email or username
-	Email      string `json:"email"`      // legacy field; treated as an identifier
+	Identifier string `json:"identifier"` // organization email
+	Email      string `json:"email"`      // legacy field (desktop); treated as the identifier
 	Password   string `json:"password"`
-	BusinessID string `json:"business_id"` // optional: employee picking their company
+	BusinessID string `json:"business_id"` // optional: must be one of the user's businesses
 }
 
-// Login verifies credentials and returns tokens. If business_id is supplied, the
-// user must be a member of that business.
+// Login verifies the organization credentials with the shared Selamnew Firebase
+// project, resolves the user (tenant, role, department) from Org&Emp, mirrors them
+// locally, and returns this API's own token pair.
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req loginReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		badRequest(c, "invalid body")
 		return
 	}
-
-	identifier := req.Identifier
+	identifier := strings.TrimSpace(req.Identifier)
 	if identifier == "" {
-		identifier = req.Email
+		identifier = strings.TrimSpace(req.Email)
 	}
-	u, hash, err := h.store.GetUserByIdentifier(c.Request.Context(), identifier)
-	if err != nil {
-		// Same response for unknown user and bad password — don't leak which.
-		unauthorized(c, "invalid credentials")
+	if identifier == "" || req.Password == "" {
+		badRequest(c, "email and password are required")
 		return
 	}
-	ok, err := auth.VerifyPassword(hash, req.Password)
-	if err != nil || !ok {
-		unauthorized(c, "invalid credentials")
+	u, _, err := h.org.SignInPassword(c.Request.Context(), identifier, req.Password)
+	if !h.signInError(c, err) {
 		return
 	}
-
-	if req.BusinessID != "" {
-		member, err := h.store.IsMember(c.Request.Context(), u.ID, req.BusinessID)
-		if err != nil {
-			serverError(c, err)
-			return
-		}
-		if !member {
-			c.JSON(http.StatusForbidden, gin.H{"error": "not a member of that business"})
-			return
-		}
+	if req.BusinessID != "" && !h.requireMember(c, u.ID, req.BusinessID) {
+		return
 	}
 	h.issue(c, http.StatusOK, u)
+}
+
+type firebaseLoginReq struct {
+	IDToken string `json:"id_token"`
+}
+
+// FirebaseLogin exchanges a Firebase ID token from another Selamnew app (the
+// shared session on the same origin) for this API's token pair.
+func (h *AuthHandler) FirebaseLogin(c *gin.Context) {
+	var req firebaseLoginReq
+	if err := c.ShouldBindJSON(&req); err != nil || strings.TrimSpace(req.IDToken) == "" {
+		badRequest(c, "id_token is required")
+		return
+	}
+	u, _, err := h.org.SignInIDToken(c.Request.Context(), strings.TrimSpace(req.IDToken))
+	if !h.signInError(c, err) {
+		return
+	}
+	h.issue(c, http.StatusOK, u)
+}
+
+// signInError writes the response for a failed org sign-in and reports whether
+// the caller may continue (err == nil).
+func (h *AuthHandler) signInError(c *gin.Context, err error) bool {
+	switch {
+	case err == nil:
+		return true
+	case errors.Is(err, identity.ErrInvalidCredentials), errors.Is(err, identity.ErrInvalidToken):
+		unauthorized(c, "invalid credentials")
+	case errors.Is(err, orgauth.ErrNotInDirectory), errors.Is(err, orgauth.ErrNoTenant):
+		c.JSON(http.StatusForbidden, gin.H{"error": err.Error() + ". Contact your administrator."})
+	case errors.Is(err, store.ErrDeactivated):
+		c.JSON(http.StatusForbidden, gin.H{"error": "your account is no longer active in your organization"})
+	case errors.Is(err, store.ErrConflict):
+		c.JSON(http.StatusConflict, gin.H{"error": "this account conflicts with an existing user; contact support"})
+	default:
+		obs.Error("org sign-in failed", "err", err)
+		c.JSON(http.StatusBadGateway, gin.H{"error": "the organization directory is unavailable, try again shortly"})
+	}
+	return false
+}
+
+func (h *AuthHandler) requireMember(c *gin.Context, userID, businessID string) bool {
+	member, err := h.store.IsMember(c.Request.Context(), userID, businessID)
+	if err != nil {
+		serverError(c, err)
+		return false
+	}
+	if !member {
+		c.JSON(http.StatusForbidden, gin.H{"error": "not a member of that business"})
+		return false
+	}
+	return true
 }
 
 type refreshReq struct {
@@ -143,6 +128,16 @@ func (h *AuthHandler) Refresh(c *gin.Context) {
 	userID, err := h.tok.ParseRefresh(req.RefreshToken)
 	if err != nil {
 		unauthorized(c, "invalid refresh token")
+		return
+	}
+	// Users removed from the Org&Emp directory lose access at their next refresh.
+	active, err := h.store.MembershipActive(c.Request.Context(), userID)
+	if err != nil {
+		serverError(c, err)
+		return
+	}
+	if !active {
+		unauthorized(c, "account deactivated")
 		return
 	}
 	pair, err := h.tok.Issue(userID)

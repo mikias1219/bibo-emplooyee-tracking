@@ -1,0 +1,78 @@
+{
+  "title": "パフォーマンス",
+  "subtitle": "アプリとウェブサイトの分類に基づく、チームの生産的な時間。",
+  "tabs": {
+    "report": "レポート",
+    "rules": "生産性ルール"
+  },
+  "period": {
+    "label": "期間",
+    "last7": "過去 7 日間",
+    "last30": "過去 30 日間",
+    "custom": "カスタム",
+    "from": "開始",
+    "to": "終了"
+  },
+  "category": {
+    "productive": "生産的",
+    "neutral": "中立",
+    "unproductive": "非生産的",
+    "unclassified": "未分類"
+  },
+  "report": {
+    "loading": "パフォーマンスを読み込み中…",
+    "error": "パフォーマンスデータを読み込めませんでした。",
+    "errorRange": "開始日は終了日より前にしてください。",
+    "score": "生産性スコア",
+    "scoreSub": "分類済み時間のうち生産的な割合",
+    "productiveTime": "生産的な時間",
+    "ofActive": "アクティブ {{active}} のうち",
+    "target": "日次目標の達成率",
+    "targetSub": "1 勤務日あたりの目標 {{target}}",
+    "coverage": "分類済みの時間",
+    "coverageSub": "ルールがあるアクティブ時間の割合",
+    "lowCoverage": "分類済みのアクティブ時間は {{pct}}% のみのため、スコアが正確でない可能性があります。",
+    "classifyNow": "アプリとウェブサイトを分類する",
+    "byDay": "日別のチーム時間",
+    "top": "最も生産的",
+    "least": "最も生産的でない",
+    "noRank": "この期間のアクティビティはありません。",
+    "empty": "まだ{{members}}がいません。",
+    "disclaimer": "スコアは分類済みのアプリやウェブサイトでの時間の使い方を示すもので、仕事の質を測るものではありません。人に関する判断の唯一の根拠にしないでください。"
+  },
+  "table": {
+    "name": "名前",
+    "breakdown": "内訳",
+    "active": "アクティブ",
+    "productive": "生産的",
+    "score": "スコア",
+    "target": "目標",
+    "view": "表示"
+  },
+  "rules": {
+    "subtitle": "チームが使うアプリとウェブサイトを、生産的・中立・非生産的に分類します。",
+    "target": "1 日の生産目標",
+    "targetHelp": "1 勤務日あたりに期待される生産的な時間。「日次目標の達成率」に使用されます。",
+    "hoursPerDay": "時間 / 日",
+    "save": "保存",
+    "targetSaved": "目標を保存しました。",
+    "targetInvalid": "1〜24 の時間数を入力してください。",
+    "apps": "アプリ",
+    "websites": "ウェブサイト",
+    "showAll": "すべて",
+    "showUnclassified": "未分類（{{count}}）",
+    "addAppPlaceholder": "アプリ名で追加（例: Visual Studio Code）",
+    "addDomainPlaceholder": "ウェブサイトを追加（例: github.com）",
+    "add": "生産的として追加",
+    "loading": "アプリとウェブサイトを読み込み中…",
+    "empty": "この期間に記録はありません。",
+    "error": "生産性ルールを読み込めませんでした。",
+    "saveError": "保存できませんでした。もう一度お試しください。",
+    "colApp": "アプリ",
+    "colDomain": "ウェブサイト",
+    "colTime": "期間内の時間",
+    "colCategory": "カテゴリ",
+    "appHelp": "ブラウザの時間は訪問したウェブサイトごとに分割されるため、アプリだけでなくウェブサイトも分類してください。未分類の時間が非生産的として数えられることはありません。",
+    "domainHelp": "ドメインのルールはサブドメインにも適用されます。「google.com」には「mail.google.com」も含まれます（独自のルールがある場合を除く）。"
+  }
+}

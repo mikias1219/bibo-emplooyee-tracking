@@ -1,0 +1,78 @@
+{
+  "title": "Hiệu suất",
+  "subtitle": "Thời gian làm việc hiệu quả của nhóm, dựa trên cách bạn phân loại ứng dụng và trang web.",
+  "tabs": {
+    "report": "Báo cáo",
+    "rules": "Quy tắc năng suất"
+  },
+  "period": {
+    "label": "Khoảng thời gian",
+    "last7": "7 ngày qua",
+    "last30": "30 ngày qua",
+    "custom": "Tùy chỉnh",
+    "from": "Từ",
+    "to": "Đến"
+  },
+  "category": {
+    "productive": "Hiệu quả",
+    "neutral": "Trung lập",
+    "unproductive": "Không hiệu quả",
+    "unclassified": "Chưa phân loại"
+  },
+  "report": {
+    "loading": "Đang tải hiệu suất…",
+    "error": "Không thể tải dữ liệu hiệu suất.",
+    "errorRange": "Ngày bắt đầu phải trước ngày kết thúc.",
+    "score": "Điểm năng suất",
+    "scoreSub": "Tỷ lệ hiệu quả trong thời gian đã phân loại",
+    "productiveTime": "Thời gian hiệu quả",
+    "ofActive": "trên {{active}} hoạt động",
+    "target": "Đạt mục tiêu ngày",
+    "targetSub": "Mục tiêu {{target}} mỗi ngày làm việc",
+    "coverage": "Thời gian đã phân loại",
+    "coverageSub": "Tỷ lệ thời gian hoạt động có quy tắc",
+    "lowCoverage": "Chỉ {{pct}}% thời gian hoạt động được phân loại, nên điểm số có thể chưa chính xác.",
+    "classifyNow": "Phân loại ứng dụng và trang web",
+    "byDay": "Thời gian của nhóm theo ngày",
+    "top": "Hiệu quả nhất",
+    "least": "Kém hiệu quả nhất",
+    "noRank": "Không có hoạt động trong khoảng thời gian này.",
+    "empty": "Chưa có {{members}}.",
+    "disclaimer": "Điểm số cho biết thời gian được dùng trong các ứng dụng và trang web đã phân loại. Điểm không đo chất lượng công việc và không nên là căn cứ duy nhất để đưa ra quyết định về nhân sự."
+  },
+  "table": {
+    "name": "Tên",
+    "breakdown": "Phân bổ",
+    "active": "Hoạt động",
+    "productive": "Hiệu quả",
+    "score": "Điểm",
+    "target": "Mục tiêu",
+    "view": "Xem"
+  },
+  "rules": {
+    "subtitle": "Đánh dấu ứng dụng và trang web nhóm bạn dùng là hiệu quả, trung lập hoặc không hiệu quả.",
+    "target": "Mục tiêu hiệu quả mỗi ngày",
+    "targetHelp": "Thời gian hiệu quả kỳ vọng mỗi ngày làm việc. Dùng cho \"Đạt mục tiêu ngày\".",
+    "hoursPerDay": "giờ / ngày",
+    "save": "Lưu",
+    "targetSaved": "Đã lưu mục tiêu.",
+    "targetInvalid": "Nhập số giờ từ 1 đến 24.",
+    "apps": "Ứng dụng",
+    "websites": "Trang web",
+    "showAll": "Tất cả",
+    "showUnclassified": "Chưa phân loại ({{count}})",
+    "addAppPlaceholder": "Thêm ứng dụng theo tên, ví dụ Visual Studio Code",
+    "addDomainPlaceholder": "Thêm trang web, ví dụ github.com",
+    "add": "Thêm là hiệu quả",
+    "loading": "Đang tải ứng dụng và trang web…",
+    "empty": "Không có dữ liệu trong khoảng thời gian này.",
+    "error": "Không thể tải quy tắc năng suất.",
+    "saveError": "Không thể lưu. Vui lòng thử lại.",
+    "colApp": "Ứng dụng",
+    "colDomain": "Trang web",
+    "colTime": "Thời gian trong kỳ",
+    "colCategory": "Phân loại",
+    "appHelp": "Thời gian trình duyệt được chia theo các trang web đã truy cập, vì vậy hãy phân loại cả trang web lẫn ứng dụng. Thời gian chưa phân loại không bao giờ bị tính là không hiệu quả.",
+    "domainHelp": "Quy tắc cho một tên miền cũng áp dụng cho các tên miền con: \"google.com\" bao gồm \"mail.google.com\" trừ khi tên miền đó có quy tắc riêng."
+  }
+}

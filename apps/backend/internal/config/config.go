@@ -26,6 +26,19 @@ type Config struct {
 	LogMaxAgeDays  int      // delete rotated files older than this many days
 	KeepaliveToken string   // secret for the CPU keep-alive endpoint; "" = disabled
 	SuperAdmins    []string // usernames/emails allowed into the super-admin area (SUPER_ADMINS, comma-separated)
+
+	// Selamnew identity: users, orgs (tenants) and departments come from the shared
+	// Org&Emp (core) service; credentials are verified by the shared Firebase project.
+	OrgEmpBaseURL     string   // ORG_EMP_BACKEND_BASE_URL, e.g. https://test-api.ienetworks.co/core/api/v1
+	OrgServiceToken   string   // ORG_SERVICE_AUTH_TOKEN: optional bearer for background directory sync
+	FirebaseAPIKey    string   // FIREBASE_API_KEY: web API key of the shared Firebase project
+	FirebaseProjectID string   // FIREBASE_PROJECT_ID (default pep-authentication)
+	OwnerRoleSlugs    []string // Core role slugs/names that make a user an owner (OWNER_ROLE_SLUGS)
+	OwnerEmails       []string // OWNER_EMAILS: accounts that are always owners, whatever their role
+	DirectorySyncMins int      // DIRECTORY_SYNC_MINUTES: background Org&Emp roster refresh interval
+	EncryptionKey     string   // ENCRYPTION_KEY  (Org&Emp payload encryption, staging/prod)
+	EncryptionIV      string   // ENCRYPTION_IV
+	EncryptionSalt    string   // ENCRYPTION_SALT (hex)
 }
 
 // Load reads .env (if present) then the process environment. It returns an error
@@ -53,6 +66,17 @@ func Load() (*Config, error) {
 		LogMaxAgeDays:  getenvInt("LOG_MAX_AGE_DAYS", 30),
 		KeepaliveToken: os.Getenv("KEEPALIVE_TOKEN"),
 		SuperAdmins:    splitList(os.Getenv("SUPER_ADMINS")),
+
+		OrgEmpBaseURL:     strings.TrimRight(strings.TrimSpace(os.Getenv("ORG_EMP_BACKEND_BASE_URL")), "/"),
+		OrgServiceToken:   os.Getenv("ORG_SERVICE_AUTH_TOKEN"),
+		FirebaseAPIKey:    os.Getenv("FIREBASE_API_KEY"),
+		FirebaseProjectID: getenv("FIREBASE_PROJECT_ID", "pep-authentication"),
+		OwnerRoleSlugs:    splitList(getenv("OWNER_ROLE_SLUGS", "owner,admin")),
+		OwnerEmails:       splitList(os.Getenv("OWNER_EMAILS")),
+		DirectorySyncMins: getenvInt("DIRECTORY_SYNC_MINUTES", 10),
+		EncryptionKey:     os.Getenv("ENCRYPTION_KEY"),
+		EncryptionIV:      os.Getenv("ENCRYPTION_IV"),
+		EncryptionSalt:    getenv("ENCRYPTION_SALT", "default-salt"),
 	}
 
 	var missing []string
@@ -61,6 +85,12 @@ func Load() (*Config, error) {
 	}
 	if cfg.JWTSecret == "" {
 		missing = append(missing, "JWT_SECRET")
+	}
+	if cfg.OrgEmpBaseURL == "" {
+		missing = append(missing, "ORG_EMP_BACKEND_BASE_URL")
+	}
+	if cfg.FirebaseAPIKey == "" {
+		missing = append(missing, "FIREBASE_API_KEY")
 	}
 	if len(missing) > 0 {
 		return nil, fmt.Errorf("missing required env: %s", strings.Join(missing, ", "))

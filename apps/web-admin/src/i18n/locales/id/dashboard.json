@@ -4,7 +4,6 @@
     "loadingBusinesses": "Memuat bisnis…",
     "loadingRoster": "Memuat daftar…",
     "errorRoster": "Tidak dapat memuat daftar.",
-    "noBusinesses": "Belum ada bisnis. Buka <0>{{members}}</0> untuk menambahkan {{member}} pertama Anda — bisnis akan dibuat secara otomatis.",
     "noActivity": "Belum ada {{members}} yang menyinkronkan aktivitas.",
     "selfBadge": "Anda",
     "view": "Lihat",
@@ -21,47 +20,16 @@
     "statScreenshots": "Tangkapan layar",
     "vsYesterday": "vs kemarin",
     "ofMembers": "dari {{count}} {{members}}",
-    "todayLabel": "hari ini",
-    "newTeam": "Tim baru"
+    "todayLabel": "hari ini"
   },
   "employees": {
-    "newBusiness": "Bisnis baru",
-    "newOrg": "{{org}} baru",
     "loading": "Memuat…",
     "loadingMembers": "Memuat {{members}}…",
     "errorLoadMembers": "Tidak dapat memuat {{members}}.",
-    "noBusinessNotice": "Anda belum memiliki bisnis. Menambahkan {{member}} pertama Anda akan otomatis membuat satu (<1>\"Tim &lt;nama Anda&gt;\"</1>). Anda juga dapat membuatnya secara eksplisit dengan \"Bisnis baru\".",
-    "rosterFor": "Daftar untuk <0>{{name}}</0>",
-    "noMembersYet": "Belum ada {{members}} di bisnis ini.",
-    "autoCreatedNote": "Tidak ada bisnis yang tersedia, jadi bisnis default dibuat secara otomatis dan {{member}} Anda ditambahkan ke dalamnya.",
     "viewReports": "Lihat laporan",
     "table": {
-      "name": "Nama",
-      "login": "Login"
+      "name": "Nama"
     }
-  },
-  "newBusinessModal": {
-    "title": "Bisnis baru",
-    "nameLabel": "Nama bisnis",
-    "orgNameLabel": "Nama {{org}}",
-    "namePlaceholder": "mis. Acme Studio",
-    "namePlaceholderFamily": "mis. Keluarga Tran",
-    "cancel": "Batal",
-    "create": "Buat",
-    "creating": "Membuat…",
-    "errorCreate": "Tidak dapat membuat bisnis."
-  },
-  "newEmployeeModal": {
-    "noBusinessSelected": "Tidak ada bisnis yang dipilih — bisnis default akan dibuat secara otomatis untuk {{member}} ini.",
-    "displayName": "Nama tampilan",
-    "usernameOrEmail": "Nama pengguna atau email",
-    "temporaryPassword": "Kata sandi sementara",
-    "shareCredentials": "Bagikan kredensial ini dengan {{member}}; mereka masuk dari pemilih login aplikasi desktop.",
-    "cancel": "Batal",
-    "adding": "Menambahkan…",
-    "generate": "Buat",
-    "errorTaken": "Email atau nama pengguna tersebut sudah digunakan.",
-    "errorCreate": "Tidak dapat membuat {{member}}."
   },
   "detail": {
     "breadcrumbDashboard": "Dasbor",

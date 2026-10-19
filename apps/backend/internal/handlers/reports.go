@@ -49,7 +49,7 @@ func (h *ReportsHandler) Roster(c *gin.Context) {
 	now := time.Now().UTC()
 	dayStart := parseInt64(c.Query("day_start"),
 		time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.UTC).Unix())
-	roster, err := h.store.Roster(c.Request.Context(), businessID, dayStart, dayStart+86400)
+	roster, err := h.store.Roster(c.Request.Context(), businessID, dayStart, dayStart+86400, c.Query("department_id"))
 	if err != nil {
 		serverError(c, err)
 		return

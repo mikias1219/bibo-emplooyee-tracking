@@ -12,8 +12,6 @@
       "desc": "Connectez-vous pour synchroniser avec votre espace d'équipe ou de famille.",
       "signIn": "Se connecter"
     },
-    "needAccount": "Besoin d'un compte ?",
-    "signupLink": "S'inscrire",
     "adminLink": "Ouvrir le tableau d'administration"
   },
   "tray": {

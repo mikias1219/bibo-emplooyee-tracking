@@ -56,6 +56,10 @@ windows = { version = "0.58", features = [
     "Win32_UI_WindowsAndMessaging",
 ] }
 
+# Linux-only: session D-Bus for idle time (Mutter / ScreenSaver) and the GNOME
+# Shell focused-app extension. Pure Rust, so no libdbus-1-dev is needed.
+[target.'cfg(target_os = "linux")'.dependencies]
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
 
 # Backend environment selected at compile time. Resolution order in code is
 # local > staging > production (see settings::DEFAULT_BACKEND_URL). The runtime

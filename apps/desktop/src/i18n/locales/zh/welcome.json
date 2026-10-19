@@ -12,8 +12,6 @@
       "desc": "登录以与您的团队或家庭工作区同步。",
       "signIn": "登录"
     },
-    "needAccount": "需要账户？",
-    "signupLink": "注册",
     "adminLink": "打开管理后台"
   },
   "tray": {

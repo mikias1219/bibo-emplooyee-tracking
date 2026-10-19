@@ -5,7 +5,8 @@
     "dashboard": "Dasbor",
     "employees": "Karyawan",
     "settings": "Pengaturan",
-    "messages": "Pesan"
+    "messages": "Pesan",
+    "performance": "Kinerja"
   },
   "actions": {
     "signIn": "Masuk",

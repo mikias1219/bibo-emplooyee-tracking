@@ -534,6 +534,15 @@ pub struct RosterEntry {
     #[serde(default)]
     pub screenshots_yesterday: i64,
     pub focus_pct_today: Option<i64>,
+    // Org&Emp directory fields (empty for legacy self-serve accounts).
+    #[serde(default)]
+    pub department_id: String,
+    #[serde(default)]
+    pub department_name: String,
+    #[serde(default)]
+    pub job_title: String,
+    #[serde(default)]
+    pub avatar_url: String,
 }
 
 #[derive(Deserialize)]
@@ -618,36 +627,7 @@ pub struct ScreenshotPage {
 }
 
 // ---- member management (Members screen) ----
-
-#[derive(Serialize)]
-struct CreateEmployeeReq<'a> {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    email: Option<&'a str>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    username: Option<&'a str>,
-    password: &'a str,
-    display_name: &'a str,
-    business_id: &'a str,
-}
-
-/// The created member returned by `POST /v1/employees` (under `employee`).
-#[derive(Deserialize, Serialize, Default)]
-pub struct CreatedEmployee {
-    #[serde(default)]
-    pub id: String,
-    #[serde(default)]
-    pub email: String,
-    #[serde(default)]
-    pub username: String,
-    #[serde(default)]
-    pub display_name: String,
-}
-
-#[derive(Deserialize)]
-struct CreateEmployeeResp {
-    #[serde(default)]
-    employee: CreatedEmployee,
-}
+// Members come from the Selamnew Org&Emp directory; see `owner_sync_directory`.
 
 impl BackendClient {
     /// `GET /v1/businesses/mine` (auto-refresh on 401) — the workspaces the
@@ -871,24 +851,23 @@ impl BackendClient {
         Err("owner_screenshot_bytes: unreachable retry exhaustion".into())
     }
 
-    /// `POST /v1/employees` (auto-refresh on 401) — pre-provision a member in an
-    /// owned workspace. Exactly one of `email`/`username` should be set.
-    pub async fn owner_create_employee(
-        &self,
-        business_id: &str,
-        display_name: &str,
-        email: Option<&str>,
-        username: Option<&str>,
-        password: &str,
-    ) -> Result<CreatedEmployee, String> {
-        let body = CreateEmployeeReq { email, username, password, display_name, business_id };
+    /// `POST /v1/businesses/{id}/directory/sync` (auto-refresh on 401) — pull the
+    /// latest people/departments/roles from the Selamnew Org&Emp directory now.
+    /// People are managed in Org&Emp; the app never creates members itself.
+    /// Returns the number of active members after the sync.
+    pub async fn owner_sync_directory(&self, business_id: &str) -> Result<i64, String> {
+        #[derive(Deserialize)]
+        struct SyncResp {
+            #[serde(default)]
+            members: i64,
+        }
+        let path = format!("/v1/businesses/{business_id}/directory/sync");
         let mut token = self.access_token()?;
         for attempt in 0..2 {
             let resp = self
                 .http
-                .post(self.url("/v1/employees"))
+                .post(self.url(&path))
                 .bearer_auth(&token)
-                .json(&body)
                 .send()
                 .await
                 .map_err(net_err)?;
@@ -899,36 +878,9 @@ impl BackendClient {
             if !resp.status().is_success() {
                 return Err(status_err(resp).await);
             }
-            let parsed: CreateEmployeeResp = resp.json().await.map_err(|e| e.to_string())?;
-            return Ok(parsed.employee);
+            let parsed: SyncResp = resp.json().await.map_err(|e| e.to_string())?;
+            return Ok(parsed.members);
         }
-        Err("owner_create_employee: unreachable retry exhaustion".into())
-    }
-
-    /// `POST /v1/businesses` (auto-refresh on 401) — create a workspace owned by
-    /// the caller. The kind (team/family) is decided server-side from the owner's
-    /// account type. Returns the new business.
-    pub async fn owner_create_business(&self, name: &str) -> Result<OwnerBusiness, String> {
-        let body = serde_json::json!({ "name": name });
-        let mut token = self.access_token()?;
-        for attempt in 0..2 {
-            let resp = self
-                .http
-                .post(self.url("/v1/businesses"))
-                .bearer_auth(&token)
-                .json(&body)
-                .send()
-                .await
-                .map_err(net_err)?;
-            if resp.status() == reqwest::StatusCode::UNAUTHORIZED && attempt == 0 {
-                token = self.refresh().await?;
-                continue;
-            }
-            if !resp.status().is_success() {
-                return Err(status_err(resp).await);
-            }
-            return resp.json().await.map_err(|e| e.to_string());
-        }
-        Err("owner_create_business: unreachable retry exhaustion".into())
+        Err("owner_sync_directory: unreachable retry exhaustion".into())
     }
 }
