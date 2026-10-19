@@ -137,6 +137,8 @@ func (h *ReportsHandler) ScreenshotImage(c *gin.Context) {
 		return
 	}
 	defer f.Close()
+	bizID, empID := h.store.BusinessOfScreenshot(c.Request.Context(), clientUUID)
+	recordAudit(c, h.store, bizID, ownerID, auditScreenshotView, "screenshot", clientUUID, gin.H{"employee_id": empID})
 	fi, err := f.Stat()
 	if err != nil {
 		serverError(c, err)
@@ -163,6 +165,9 @@ func (h *ReportsHandler) scope(c *gin.Context) (ownerID, empID string, from, to 
 
 	from = parseInt64(c.Query("from"), 0)
 	to = parseInt64(c.Query("to"), time.Now().Unix()+1)
+	// Roadmap M9: every per-employee report view is audited.
+	recordAudit(c, h.store, h.store.BusinessOfOwnedEmployee(c.Request.Context(), ownerID, empID),
+		ownerID, auditReportView, "employee", empID, gin.H{"report": c.FullPath(), "from": from, "to": to})
 	return ownerID, empID, from, to, true
 }
 

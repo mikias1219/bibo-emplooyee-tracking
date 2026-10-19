@@ -166,6 +166,8 @@ func (h *OwnerHandler) UpdateSettings(c *gin.Context) {
 		serverError(c, err)
 		return
 	}
+	actor, _ := auth.UserID(c)
+	recordAudit(c, h.store, c.Param("id"), actor, auditSettingsUpdate, "business", c.Param("id"), fields)
 	c.JSON(http.StatusOK, gin.H{"status": "ok"})
 }
 

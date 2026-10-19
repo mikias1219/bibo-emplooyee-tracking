@@ -3,32 +3,7 @@ import { call as invoke } from "@/shared/api/tauri";
 import { open } from "@tauri-apps/plugin-dialog";
 import { getVersion } from "@tauri-apps/api/app";
 import { useTranslation } from "react-i18next";
-import i18n, { LOCALES } from "@/i18n";
 import { checkForUpdates } from "@/features/updater/updater";
-
-import enSettings from "@/i18n/locales/en/settings.json";
-import zhSettings from "@/i18n/locales/zh/settings.json";
-import jaSettings from "@/i18n/locales/ja/settings.json";
-import viSettings from "@/i18n/locales/vi/settings.json";
-import idSettings from "@/i18n/locales/id/settings.json";
-import frSettings from "@/i18n/locales/fr/settings.json";
-import esSettings from "@/i18n/locales/es/settings.json";
-
-// Register the `settings` namespace without modifying the shared i18n init.
-const SETTINGS_BUNDLES: Record<string, object> = {
-  en: enSettings,
-  zh: zhSettings,
-  ja: jaSettings,
-  vi: viSettings,
-  id: idSettings,
-  fr: frSettings,
-  es: esSettings,
-};
-for (const [lng, bundle] of Object.entries(SETTINGS_BUNDLES)) {
-  if (!i18n.hasResourceBundle(lng, "settings")) {
-    i18n.addResourceBundle(lng, "settings", bundle, true, true);
-  }
-}
 
 export type AppSettings = {
   theme: string;
@@ -420,23 +395,9 @@ export function Settings({
     return <div className="muted">{t("loading")}</div>;
   }
 
-  const curLang = LOCALES.find((l) => l.code === i18n.resolvedLanguage)?.code ?? "en";
-
   return (
     <div className="bb-set">
       <Section title={t("general")}>
-        <Row title={t("displayLanguage")}>
-          <Select
-            width={200}
-            value={curLang}
-            options={LOCALES.map((l) => ({ value: l.code, label: l.label }))}
-            onChange={(code) => {
-              i18n.changeLanguage(code);
-              // Mirror to native settings so the tray menu/tooltip localize too.
-              invoke("set_locale", { locale: code }).catch(() => {});
-            }}
-          />
-        </Row>
         <Row
           title={IS_WINDOWS ? t("hideDockWindows") : t("hideDockMac")}
           desc={IS_WINDOWS ? t("hideDockDescWindows") : t("hideDockDescMac")}

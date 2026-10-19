@@ -30,7 +30,12 @@ styles/theme.css      design tokens + component styles
 2. If it needs the backend, add a Rust command in `src-tauri/src/commands/mod.rs`
    (+ a `BackendClient` method in `sync/client.rs`), register it in `lib.rs`, and call
    it with `call("<command>")` from `@/shared/api/tauri`.
-3. Add strings to `i18n/locales/en/*.json` (other languages fall back to English).
+3. Add strings to `i18n/locales/en/*.json` (the UI is English-only).
 4. Wire the screen into navigation in `app/App.tsx`.
+
+Admin screens shared with the web admin (Performance, Rules, Workspace settings,
+Attendance, Agent health, Audit log) live in `packages/admin-ui` and are hosted by
+`features/admin/AdminScope.tsx` over the `admin_api` Tauri command — add new admin
+screens there, not here.
 
 Move code into `shared/` only once a second feature needs it.

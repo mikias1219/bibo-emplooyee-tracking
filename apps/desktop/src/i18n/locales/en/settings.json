@@ -1,7 +1,6 @@
 {
   "loading": "Loading settings…",
   "general": "General",
-  "displayLanguage": "Display language",
   "hideDockMac": "Hide from Dock",
   "hideDockWindows": "Hide from taskbar",
   "hideDockDescMac": "Run BiBoTracking from the menu bar only.",

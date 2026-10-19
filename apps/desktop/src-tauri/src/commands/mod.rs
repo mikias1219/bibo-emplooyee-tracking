@@ -44,7 +44,13 @@ pub fn track_event(
     let Ok(data_dir) = app.path().app_data_dir() else {
         return;
     };
-    crate::analytics::track_event(name, locale, session.0.clone(), data_dir.join("analytics-queue"), props);
+    crate::analytics::track_event(
+        name,
+        locale,
+        session.0.clone(),
+        data_dir.join("analytics-queue"),
+        props,
+    );
 }
 
 #[tauri::command]
@@ -115,23 +121,6 @@ pub fn get_settings(
     state.current.lock().unwrap().clone()
 }
 
-/// Persist the chosen UI locale and re-translate the native tray to match. Called
-/// by the in-app language switcher so the menu-bar item follows the app's language.
-#[tauri::command]
-pub fn set_locale(
-    locale: String,
-    app: tauri::AppHandle,
-    state: State<Arc<crate::settings::SettingsState>>,
-) -> Result<(), String> {
-    {
-        let mut cur = state.current.lock().unwrap();
-        cur.locale = locale;
-        crate::settings::save(&state.path, &cur).map_err(err)?;
-    }
-    crate::tray::relabel(&app);
-    Ok(())
-}
-
 /// Persist new settings and apply them live to the trackers + ingest server.
 #[tauri::command]
 pub fn set_settings(
@@ -140,8 +129,8 @@ pub fn set_settings(
     state: State<Arc<crate::settings::SettingsState>>,
     control: State<Arc<TrackerControl>>,
 ) -> Result<(), String> {
-    // The UI's settings payload doesn't carry `locale` (it's owned by `set_locale`),
-    // so preserve the persisted value instead of letting serde's default reset it.
+    // The UI's settings payload doesn't carry `locale`; preserve the persisted value
+    // instead of letting serde's default reset it.
     value.locale = state.current.lock().unwrap().locale.clone();
     // When the org controls capture settings, ignore changes to those fields —
     // the rest (theme, dock, etc.) still apply.
@@ -243,11 +232,7 @@ pub fn capture_now(
     control: State<Arc<TrackerControl>>,
 ) -> Result<usize, String> {
     use tauri::Manager;
-    let dir = app
-        .path()
-        .app_data_dir()
-        .map_err(err)?
-        .join("screenshots");
+    let dir = app.path().app_data_dir().map_err(err)?.join("screenshots");
     Ok(crate::trackers::capture_once(&db, &dir, &control))
 }
 
@@ -476,7 +461,9 @@ pub async fn admin_employee_keystrokes(
     auth: State<'_, Arc<AuthState>>,
 ) -> Result<Vec<crate::sync::client::KeystrokeBucketRow>, String> {
     let client = BackendClient::new(backend_url(), auth.inner().clone());
-    client.owner_employee_keystrokes(&employee_id, from, to).await
+    client
+        .owner_employee_keystrokes(&employee_id, from, to)
+        .await
 }
 
 /// Browser page visits for one employee in `[from, to)`.
@@ -520,6 +507,23 @@ pub async fn admin_screenshot_data(
     let (bytes, content_type) = client.owner_screenshot_bytes(&client_uuid).await?;
     let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
     Ok(format!("data:{content_type};base64,{b64}"))
+}
+
+/// Generic admin API call for the shared admin screens (@ctracking/admin-ui):
+/// Performance, Rules, Workspace settings, Attendance, Agent health, Audit log.
+/// Path-restricted to the owner/manager API in `BackendClient::owner_request`.
+#[tauri::command]
+pub async fn admin_api(
+    method: String,
+    path: String,
+    query: Option<serde_json::Map<String, serde_json::Value>>,
+    body: Option<serde_json::Value>,
+    auth: State<'_, Arc<AuthState>>,
+) -> Result<serde_json::Value, String> {
+    let client = BackendClient::new(backend_url(), auth.inner().clone());
+    client
+        .owner_request(&method, &path, query.as_ref(), body.as_ref())
+        .await
 }
 
 /// Refresh an owned workspace's members from the Selamnew Org&Emp directory
@@ -787,7 +791,8 @@ mod tests {
         })
         .unwrap();
 
-        let dir = std::env::temp_dir().join(format!("ctracking_export_test_{}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("ctracking_export_test_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let summary = export_to_dir(&db, dir.to_str().unwrap(), 0, i64::MAX).unwrap();
         assert_eq!(summary.files.len(), 4);
@@ -815,8 +820,7 @@ mod tests {
         .unwrap();
         db.add_keystrokes(60, 9).unwrap();
 
-        let dir =
-            std::env::temp_dir().join(format!("ctracking_json_test_{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("ctracking_json_test_{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         export_json_to_dir(&db, dir.to_str().unwrap(), 0, i64::MAX).unwrap();
 

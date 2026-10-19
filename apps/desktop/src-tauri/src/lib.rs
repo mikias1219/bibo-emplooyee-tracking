@@ -9,8 +9,8 @@ mod server;
 mod settings;
 mod storage;
 mod sync;
-mod tray;
 mod trackers;
+mod tray;
 
 use std::sync::Arc;
 use tauri::{Emitter, Manager};
@@ -73,7 +73,6 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             commands::track_event,
-
             commands::set_paused,
             commands::set_in_setup,
             commands::is_paused,
@@ -84,7 +83,6 @@ pub fn run() {
             commands::browser_visits,
             commands::get_settings,
             commands::set_settings,
-            commands::set_locale,
             commands::export_csv,
             commands::export_json,
             commands::permissions_status,
@@ -102,6 +100,7 @@ pub fn run() {
             commands::admin_employee_screenshots,
             commands::admin_screenshot_data,
             commands::admin_sync_directory,
+            commands::admin_api,
             commands::login,
             commands::logout,
             commands::current_session,
@@ -221,7 +220,11 @@ pub fn run() {
             // Product analytics: one fire-and-forget event per launch (crash-free,
             // direct Aptabase API — see analytics.rs). Tagged with the per-launch
             // analytics_session; offline launches queue under data_dir for later flush.
-            analytics::track_app_started(loaded_locale, analytics_session.0.clone(), data_dir.join("analytics-queue"));
+            analytics::track_app_started(
+                loaded_locale,
+                analytics_session.0.clone(),
+                data_dir.join("analytics-queue"),
+            );
             Ok(())
         })
         .run(tauri::generate_context!())

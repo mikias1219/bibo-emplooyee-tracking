@@ -41,7 +41,7 @@ func TestOrgProvisionAndSync(t *testing.T) {
 		pool.Exec(ctx, `DELETE FROM users WHERE email LIKE $1`, tenant+"%")
 	})
 
-	u, biz, err := s.ProvisionOrgUser(ctx, OrgMember{Profile: owner, IsOwner: true})
+	u, biz, err := s.ProvisionOrgUser(ctx, OrgMember{Profile: owner, Role: "owner"})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,12 +52,12 @@ func TestOrgProvisionAndSync(t *testing.T) {
 		t.Fatal("owner should own the tenant business")
 	}
 	// Second sign-in is idempotent (same user, same business).
-	u2, biz2, err := s.ProvisionOrgUser(ctx, OrgMember{Profile: owner, IsOwner: true})
+	u2, biz2, err := s.ProvisionOrgUser(ctx, OrgMember{Profile: owner, Role: "owner"})
 	if err != nil || u2.ID != u.ID || biz2.ID != biz.ID {
 		t.Fatalf("re-provision: %v %s/%s", err, u2.ID, biz2.ID)
 	}
 
-	all := []OrgMember{{Profile: owner, IsOwner: true}, {Profile: emp}, {Profile: gone}}
+	all := []OrgMember{{Profile: owner, Role: "owner"}, {Profile: emp}, {Profile: gone}}
 	if n, err := s.SyncDirectory(ctx, tenant, all); err != nil || n != 3 {
 		t.Fatalf("sync: n=%d err=%v", n, err)
 	}

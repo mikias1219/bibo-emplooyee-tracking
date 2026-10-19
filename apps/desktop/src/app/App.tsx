@@ -19,9 +19,19 @@ import { TeamOverview } from "@/features/admin/team-overview/TeamOverview";
 import { Members } from "@/features/admin/members/Members";
 import { WorkspacePicker } from "@/features/admin/components/WorkspacePicker";
 import type { OwnerBusiness, RosterEntry } from "@/features/admin/types";
+import { AdminScope } from "@/features/admin/AdminScope";
+import { localDayStart } from "@/features/admin/lib";
+import {
+  AgentHealth,
+  Attendance,
+  AuditLog,
+  Performance,
+  ProductivityRules,
+  WorkspaceSettings,
+  type AdminView,
+} from "@ctracking/admin-ui";
 import { Welcome } from "@/features/auth/Welcome";
 import { Onboarding } from "@/features/onboarding/Onboarding";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { MessageCenter } from "@/features/messages/MessageCenter";
 import { AppTrayMenu } from "./AppTrayMenu";
 
@@ -33,14 +43,35 @@ type Screen =
   | "Permissions"
   | "TeamOverview"
   | "Members"
+  | "Performance"
+  | "Rules"
+  | "Attendance"
+  | "Agents"
+  | "Audit"
+  | "WorkspaceSettings"
   | "Settings";
+
+// Shared admin screens (@ctracking/admin-ui) ↔ sidebar screens.
+const ADMIN_VIEW_SCREEN: Record<AdminView, Screen> = {
+  performance: "Performance",
+  rules: "Rules",
+  attendance: "Attendance",
+  agents: "Agents",
+  audit: "Audit",
+  settings: "WorkspaceSettings",
+};
+const SCREEN_ADMIN_VIEW = Object.fromEntries(
+  Object.entries(ADMIN_VIEW_SCREEN).map(([v, s]) => [s, v as AdminView]),
+) as Partial<Record<Screen, AdminView>>;
+const ADMIN_SCREENS = new Set<Screen>(["TeamOverview", "Members", ...Object.values(ADMIN_VIEW_SCREEN)]);
 
 // Sidebar is grouped: "me" = this machine's own tracking (every user), "admin" =
 // owner-only team management (hidden unless isOwner), "app" = app-wide settings.
 type NavGroup = { key: "me" | "admin" | "app"; items: Screen[] };
 const NAV_GROUPS: NavGroup[] = [
   { key: "me", items: ["Dashboard", "Activity", "Screenshots", "Browser", "Permissions"] },
-  { key: "admin", items: ["TeamOverview", "Members"] },
+  // Roadmap admin modules — same screens as the web admin on every platform.
+  { key: "admin", items: ["TeamOverview", "Members", "Performance", "Attendance", "Agents", "Audit", "WorkspaceSettings"] },
   { key: "app", items: ["Settings"] },
 ];
 
@@ -104,6 +135,21 @@ const TeamOverviewIcon = () => (
     <rect x="12" y="6" width="3" height="11" rx="1" /><rect x="17" y="13" width="3" height="4" rx="1" />
   </svg>
 );
+const PerformanceNavIcon = () => (
+  <svg {...svgProps} aria-hidden><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="m19 9-5 5-4-4-3 3" /></svg>
+);
+const ClockNavIcon = () => (
+  <svg {...svgProps} aria-hidden><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+);
+const MonitorNavIcon = () => (
+  <svg {...svgProps} aria-hidden><rect x="2" y="3" width="20" height="14" rx="2" /><path d="M8 21h8M12 17v4" /></svg>
+);
+const AuditNavIcon = () => (
+  <svg {...svgProps} aria-hidden><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h4" /></svg>
+);
+const SlidersNavIcon = () => (
+  <svg {...svgProps} aria-hidden><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6" /></svg>
+);
 const NAV_ICON: Record<Screen, () => ReactElement> = {
   Dashboard: GridIcon,
   Activity: ActivityIcon,
@@ -112,6 +158,12 @@ const NAV_ICON: Record<Screen, () => ReactElement> = {
   Permissions: ShieldNavIcon,
   TeamOverview: TeamOverviewIcon,
   Members: MembersIcon,
+  Performance: PerformanceNavIcon,
+  Rules: PerformanceNavIcon,
+  Attendance: ClockNavIcon,
+  Agents: MonitorNavIcon,
+  Audit: AuditNavIcon,
+  WorkspaceSettings: SlidersNavIcon,
   Settings: GearIcon,
 };
 
@@ -187,7 +239,6 @@ function App() {
     // gate can read `local_only` before any login.
     invoke<AppSettings>("get_settings").then(setSettings).catch(() => {});
     // Sync the native side (tray) to the UI's detected/saved language on startup.
-    invoke("set_locale", { locale: i18n.resolvedLanguage ?? "en" }).catch(() => {});
   }, [i18n.resolvedLanguage]);
 
   // Resolve owned workspaces whenever the session changes, so the admin nav group
@@ -427,7 +478,21 @@ function App() {
     );
   }
 
-  const isAdminScreen = screen === "TeamOverview" || screen === "Members";
+  const isAdminScreen = ADMIN_SCREENS.has(screen);
+  const adminView = SCREEN_ADMIN_VIEW[screen];
+  // Open one member's detail (Members tab) from a shared admin screen.
+  const openEmployee = (id: string) => {
+    if (!bizId) return;
+    invoke<RosterEntry[]>("admin_roster", { businessId: bizId, dayStart: localDayStart() })
+      .then((rows) => {
+        const row = rows.find((r) => r.id === id);
+        if (row) {
+          setMemberDetail(row);
+          setScreen("Members");
+        }
+      })
+      .catch(() => {});
+  };
   // On the Members tab, a drilled-in member's name replaces the section title.
   const headerTitle =
     screen === "Members" && memberDetail ? memberDetail.display_name : t(`nav.${screen}`);
@@ -471,7 +536,7 @@ function App() {
                 return (
                   <div
                     key={n}
-                    className={`nav-item ${screen === n ? "active" : ""}`}
+                    className={`nav-item ${screen === n || (n === "Performance" && screen === "Rules") ? "active" : ""}`}
                     onClick={() => {
                       setScreen(n);
                       setMemberDetail(null);
@@ -534,7 +599,6 @@ function App() {
                 onSelect={setBizId}
               />
             )}
-            <LanguageSwitcher compact />
             <Segmented
               options={["Light", "Dark", "System"]}
               value={theme}
@@ -611,6 +675,22 @@ function App() {
             ) : (
               <div className="muted bb-adminboard__msg">{t("loading")}</div>
             ))}
+          {adminView && bizId && (
+            <AdminScope
+              businessId={bizId}
+              view={adminView}
+              user={session ? { email: session.email, display_name: session.display_name || session.email } : null}
+              onNavigate={(v) => setScreen(ADMIN_VIEW_SCREEN[v])}
+              onOpenEmployee={openEmployee}
+            >
+              {adminView === "performance" && <Performance />}
+              {adminView === "rules" && <ProductivityRules />}
+              {adminView === "attendance" && <Attendance />}
+              {adminView === "agents" && <AgentHealth />}
+              {adminView === "audit" && <AuditLog />}
+              {adminView === "settings" && <WorkspaceSettings />}
+            </AdminScope>
+          )}
           {screen === "Settings" && (
             <Settings
               settings={settings}

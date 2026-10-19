@@ -93,7 +93,7 @@ func (s *Service) provision(ctx context.Context, sess identity.Session) (store.U
 		p.Email = sess.Email
 	}
 	isOwner := s.isOwner(p)
-	u, biz, err := s.st.ProvisionOrgUser(ctx, store.OrgMember{Profile: p, IsOwner: isOwner})
+	u, biz, err := s.st.ProvisionOrgUser(ctx, store.OrgMember{Profile: p, Role: s.roleOf(p)})
 	if err != nil {
 		return store.User{}, store.Business{}, err
 	}
@@ -186,7 +186,7 @@ func (s *Service) syncTenant(ctx context.Context, tenant, bearer string, force b
 	}
 	members := make([]store.OrgMember, 0, len(profiles))
 	for _, p := range profiles {
-		members = append(members, store.OrgMember{Profile: p, IsOwner: s.isOwner(p)})
+		members = append(members, store.OrgMember{Profile: p, Role: s.roleOf(p)})
 	}
 	n, err := s.st.SyncDirectory(ctx, tenant, members)
 	if err == nil {
@@ -217,6 +217,18 @@ func (s *Service) bearerFor(ctx context.Context, tenant string) (string, error) 
 		return s.serviceToken, nil
 	}
 	return "", ErrNoSyncCredential
+}
+
+// roleOf maps an Org&Emp profile to a local role (roadmap M9): Core owner/admin
+// (or OWNER_EMAILS) → owner; department lead → manager; everyone else → employee.
+func (s *Service) roleOf(p orgemp.Profile) string {
+	switch {
+	case s.isOwner(p):
+		return "owner"
+	case p.IsDepartmentLead:
+		return "manager"
+	}
+	return "employee"
 }
 
 func (s *Service) isOwner(p orgemp.Profile) bool {

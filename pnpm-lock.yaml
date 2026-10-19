@@ -35,6 +35,9 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@ctracking/admin-ui':
+        specifier: workspace:*
+        version: link:../../packages/admin-ui
       '@fontsource-variable/manrope':
         specifier: ^5.2.8
         version: 5.2.8
@@ -59,9 +62,6 @@ importers:
       i18next:
         specifier: ^26.3.1
         version: 26.3.3(typescript@5.8.3)
-      i18next-browser-languagedetector:
-        specifier: ^8.2.1
-        version: 8.2.1
       react:
         specifier: ^19.1.0
         version: 19.2.7
@@ -95,15 +95,15 @@ importers:
 
   apps/web-admin:
     dependencies:
+      '@ctracking/admin-ui':
+        specifier: workspace:*
+        version: link:../../packages/admin-ui
       '@sentry/react':
         specifier: ^10.59.0
         version: 10.62.0(react@19.2.7)
       i18next:
         specifier: ^26.3.1
         version: 26.3.3(typescript@5.8.3)
-      i18next-browser-languagedetector:
-        specifier: ^8.2.1
-        version: 8.2.1
       react:
         specifier: ^19.1.0
         version: 19.2.7
@@ -132,6 +132,24 @@ importers:
       vite:
         specifier: ^7.0.4
         version: 7.3.5
+
+  packages/admin-ui:
+    devDependencies:
+      '@types/react':
+        specifier: ^19.1.8
+        version: 19.2.17
+      i18next:
+        specifier: ^26.3.1
+        version: 26.3.3(typescript@5.8.3)
+      react:
+        specifier: ^19.1.0
+        version: 19.2.7
+      react-i18next:
+        specifier: ^17.0.8
+        version: 17.0.8(i18next@26.3.3(typescript@5.8.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@5.8.3)
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
 
 packages:
 
@@ -906,9 +924,6 @@ packages:
 
   html-parse-stringify@3.0.1:
     resolution: {integrity: sha512-KknJ50kTInJ7qIScF3jeaFRpMpE8/lfiTdzf/twXyPBLAGrLRTmkz3AdTnKeh40X8k9L2fdYwEp/42WGXIRGcg==}
-
-  i18next-browser-languagedetector@8.2.1:
-    resolution: {integrity: sha512-bZg8+4bdmaOiApD7N7BPT9W8MLZG+nPTOFlLiJiT8uzKXFjhxw4v2ierCXOwB5sFDMtuA5G4kgYZ0AznZxQ/cw==}
 
   i18next@26.3.3:
     resolution: {integrity: sha512-aYVegyBdXSO93CMMihvr47jI7GHSOcIahMpJX+qzUXDzW4xDJf2uenIA+45vDU+YhiVdcfsql70AC9RVdMNrHg==}
@@ -1760,10 +1775,6 @@ snapshots:
   html-parse-stringify@3.0.1:
     dependencies:
       void-elements: 3.1.0
-
-  i18next-browser-languagedetector@8.2.1:
-    dependencies:
-      '@babel/runtime': 7.29.7
 
   i18next@26.3.3(typescript@5.8.3):
     optionalDependencies:

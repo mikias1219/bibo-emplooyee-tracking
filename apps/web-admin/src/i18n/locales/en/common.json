@@ -6,7 +6,10 @@
     "employees": "Employees",
     "settings": "Settings",
     "messages": "Messages",
-    "performance": "Performance"
+    "performance": "Performance",
+    "attendance": "Attendance",
+    "agents": "Agent health",
+    "audit": "Audit log"
   },
   "actions": {
     "signIn": "Sign in",

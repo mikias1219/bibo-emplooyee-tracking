@@ -3,7 +3,6 @@ import { call as invoke } from "@/shared/api/tauri";
 import { useTranslation } from "react-i18next";
 import { BrandMark } from "@/shared/ui/index";
 import { AuthTitleBar } from "@/shared/components/AuthTitleBar";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 export type Session = {
   email: string;
@@ -91,7 +90,6 @@ export function Login({
         </button>
       )}
       <div className="welcome-lang">
-        <LanguageSwitcher compact />
       </div>
 
       <BrandMark />

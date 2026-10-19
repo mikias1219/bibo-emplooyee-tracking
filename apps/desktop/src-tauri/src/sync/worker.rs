@@ -19,6 +19,10 @@ use super::client::BackendClient;
 use super::BATCH_LIMIT;
 use crate::storage::{Db, SyncTable};
 
+/// How often the agent reports its version/OS/host (Agent health).
+const CHECKIN_EVERY_S: i64 = 15 * 60;
+static LAST_CHECKIN: std::sync::atomic::AtomicI64 = std::sync::atomic::AtomicI64::new(0);
+
 /// Base interval between sync passes (1 min). Backoff multiplies this on failure.
 const BASE_INTERVAL: Duration = Duration::from_secs(60);
 /// Cap the backoff so we still retry roughly every 16 min when the backend is down.
@@ -127,6 +131,18 @@ pub async fn run_once(ctx: &SyncContext) -> PassOutcome {
     let client = BackendClient::new(base_url, ctx.auth.clone());
     let mut failed = false;
 
+    // Agent health check-in (roadmap M1/M10): at most every 15 minutes, best effort.
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs() as i64)
+        .unwrap_or(0);
+    if now - LAST_CHECKIN.load(std::sync::atomic::Ordering::Relaxed) >= CHECKIN_EVERY_S {
+        match client.agent_checkin(&device_id).await {
+            Ok(()) => LAST_CHECKIN.store(now, std::sync::atomic::Ordering::Relaxed),
+            Err(e) => crate::log_info!("sync", "agent check-in failed: {e}"),
+        }
+    }
+
     // --- JSON batch: activity + keystrokes + browser ---
     loop {
         let activity = match ctx.db.pending_activity(BATCH_LIMIT) {
@@ -206,7 +222,11 @@ pub async fn run_once(ctx: &SyncContext) -> PassOutcome {
                             break;
                         }
                         Err(e) => {
-                            crate::log_warn!("sync", "screenshot {} skipped: {e}", shot.client_uuid);
+                            crate::log_warn!(
+                                "sync",
+                                "screenshot {} skipped: {e}",
+                                shot.client_uuid
+                            );
                             continue;
                         }
                     }

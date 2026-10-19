@@ -1,0 +1,54 @@
+{
+  "terms": {
+    "one": "Employee",
+    "many": "Employees",
+    "lowerOne": "employee",
+    "lowerMany": "employees"
+  },
+  "common": {
+    "employee": "Employee",
+    "department": "Department"
+  },
+  "attendance": {
+    "title": "Attendance",
+    "subtitle": "Observed work hours from computer activity: first and last activity, active and idle time.",
+    "empty": "No activity recorded in this period.",
+    "day": "Day",
+    "first": "First activity",
+    "last": "Last activity",
+    "observed": "Observed",
+    "active": "Active",
+    "idle": "Idle"
+  },
+  "agents": {
+    "title": "Agent health",
+    "subtitle": "{{count}} installed agents",
+    "empty": "No agents have checked in yet.",
+    "device": "Device",
+    "os": "OS",
+    "version": "Agent version",
+    "lastSeen": "Last check-in",
+    "status": "Status",
+    "staleWarning": "{{count}} agent(s) have not reported for over 24 hours.",
+    "health": {
+      "online": "Online",
+      "idle": "Quiet",
+      "stale": "Not reporting"
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "subtitle": "Who viewed reports and screenshots, and who changed settings.",
+    "empty": "No audited actions yet.",
+    "when": "When",
+    "who": "Who",
+    "action": "Action",
+    "target": "Target",
+    "actions": {
+      "report.view": "Viewed a report",
+      "screenshot.view": "Viewed a screenshot",
+      "settings.update": "Changed workspace settings",
+      "policy.update": "Changed a department policy"
+    }
+  }
+}

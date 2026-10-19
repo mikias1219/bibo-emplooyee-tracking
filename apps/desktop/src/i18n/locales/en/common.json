@@ -15,7 +15,13 @@
     "group": {
       "me": "Personal",
       "admin": "Admin"
-    }
+    },
+    "Performance": "Performance",
+    "Rules": "Productivity rules",
+    "Attendance": "Attendance",
+    "Agents": "Agent health",
+    "Audit": "Audit log",
+    "WorkspaceSettings": "Workspace settings"
   },
   "status": {
     "tracking": "Tracking",

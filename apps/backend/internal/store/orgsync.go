@@ -17,7 +17,9 @@ var ErrDeactivated = errors.New("membership deactivated")
 // OrgMember is the role + department a directory user holds in their tenant.
 type OrgMember struct {
 	Profile orgemp.Profile
-	IsOwner bool
+	// Role is 'owner' (admin: all data + settings), 'manager' (own department only)
+	// or 'employee'. Resolved from Org&Emp by orgauth.
+	Role string
 }
 
 // ProvisionOrgUser mirrors a signed-in Org&Emp user locally: it upserts the user
@@ -213,22 +215,23 @@ func tenantBusinessTx(ctx context.Context, tx pgx.Tx, tenantID, tenantName, crea
 }
 
 func upsertMembershipTx(ctx context.Context, tx pgx.Tx, userID, businessID string, m OrgMember) error {
-	role := "employee"
-	if m.IsOwner {
-		role = "owner"
+	role := m.Role
+	if role != "owner" && role != "manager" {
+		role = "employee"
 	}
 	p := m.Profile
 	_, err := tx.Exec(ctx, `
 		INSERT INTO memberships (user_id, business_id, role, department_id, department_name, job_title,
-		                         is_department_lead, deactivated_at, synced_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, NULL, now())
+		                         is_department_lead, manager_org_user_id, deactivated_at, synced_at)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8::uuid, NULL, now())
 		ON CONFLICT (user_id, business_id) DO UPDATE SET
 		       role = EXCLUDED.role, department_id = EXCLUDED.department_id,
 		       department_name = EXCLUDED.department_name, job_title = EXCLUDED.job_title,
 		       is_department_lead = EXCLUDED.is_department_lead,
+		       manager_org_user_id = EXCLUDED.manager_org_user_id,
 		       deactivated_at = NULL, synced_at = now()`,
 		userID, businessID, role, nullable(p.DepartmentID), nullable(p.DepartmentName),
-		nullable(p.JobTitle), p.IsDepartmentLead)
+		nullable(p.JobTitle), p.IsDepartmentLead, nullable(p.ManagerOrgUserID))
 	return err
 }
 

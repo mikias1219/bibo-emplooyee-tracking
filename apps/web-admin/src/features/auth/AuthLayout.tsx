@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import lockupLight from "@/assets/lockup-light.png";
 import lockupDark from "@/assets/lockup-dark.png";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 /**
  * AuthLayout — the shared "welcome surface": centered card on a soft accent
@@ -27,7 +26,6 @@ export function AuthLayout({
   return (
     <div className="auth-wrap welcome">
       <div className="auth-lang">
-        <LanguageSwitcher />
       </div>
       {!hideLockup && (
         <>

@@ -33,6 +33,7 @@ type Profile struct {
 	DepartmentName   string
 	JobTitle         string
 	IsDepartmentLead bool
+	ManagerOrgUserID string // reportingTo: the Org&Emp user this person reports to
 	Deleted          bool
 }
 
@@ -256,6 +257,12 @@ func mapProfile(m map[string]any) Profile {
 			p.TenantID = str(t, "id", "tenantId")
 		}
 		p.TenantName = str(t, "name", "companyName", "tenantName")
+	}
+	if r := obj(m, "reportingTo"); r != nil {
+		p.ManagerOrgUserID = str(r, "id", "userId")
+	}
+	if p.ManagerOrgUserID == "" {
+		p.ManagerOrgUserID = str(m, "reportingToId", "managerId")
 	}
 	if p.TenantName == "" {
 		p.TenantName = str(m, "tenantName", "companyName")

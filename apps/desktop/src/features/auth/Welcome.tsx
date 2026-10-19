@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { BrandMark } from "@/shared/ui/index";
 import { AuthTitleBar } from "@/shared/components/AuthTitleBar";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 
 /** Right-pointing arrow used inside the persona-card action links. */
 function Arrow() {
@@ -40,7 +39,6 @@ export function Welcome({
     <div className="login welcome">
       <AuthTitleBar />
       <div className="welcome-lang">
-        <LanguageSwitcher compact />
       </div>
       <BrandMark />
       <div className="login-card">

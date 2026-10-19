@@ -1,7 +1,7 @@
 import { adminUpdateMessage } from "@/features/internal-messages/api";
 import type { EventCounts, MessageDef } from "@/shared/api/types";
 
-export const LOCALES = ["en", "vi", "zh", "ja", "id", "fr", "es"] as const;
+export const LOCALES = ["en"] as const;
 
 export type Status = "active" | "paused" | "scheduled" | "ended";
 

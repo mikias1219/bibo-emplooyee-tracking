@@ -4754,3 +4754,27 @@ td {
   gap: 8px;
   margin-top: 20px;
 }
+
+/* ── Tokens used by the shared admin screens (@ctracking/admin-ui) ──
+   Aliases onto this theme's palette so the shared Performance / Rules /
+   Workspace settings screens match the desktop look in light and dark. */
+:root,
+:root[data-theme="light"] {
+  --positive: var(--success);
+  --negative: var(--danger);
+  --brand-400: color-mix(in srgb, var(--accent) 80%, white);
+  --brand-600: color-mix(in srgb, var(--accent) 85%, black);
+  --brand-tint: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  --border-strong: color-mix(in srgb, var(--text) 18%, var(--border));
+  --surface-hover: color-mix(in srgb, var(--text) 5%, var(--surface));
+  --surface-sunken: color-mix(in srgb, var(--text) 5%, var(--bg));
+  --ring-focus: 0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent);
+  --focal-grad: linear-gradient(155deg, #20242e, #111319);
+  --focal-border: rgba(255, 255, 255, 0.08);
+  --focal-muted: rgba(255, 255, 255, 0.58);
+}
+:root[data-theme="dark"] {
+  --focal-grad: linear-gradient(155deg, #0e1016, #050608);
+  --focal-border: color-mix(in srgb, var(--accent) 32%, transparent);
+  --focal-muted: rgba(255, 255, 255, 0.55);
+}

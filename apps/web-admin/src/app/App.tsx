@@ -8,9 +8,8 @@ import { Dashboard } from "@/features/dashboard/Dashboard";
 import { EmployeeDetail } from "@/features/employees/detail/EmployeeDetail";
 import { Employees } from "@/features/employees/Employees";
 import { SignIn } from "@/features/auth/SignIn";
-import { Settings } from "@/features/settings/Settings";
-import { Performance } from "@/features/performance/Performance";
-import { ProductivityRules } from "@/features/performance/ProductivityRules";
+import { AgentHealth, Attendance, AuditLog, Performance, ProductivityRules, WorkspaceSettings } from "@ctracking/admin-ui";
+import { AdminScope } from "@/features/admin/AdminScope";
 import { SuperAdminRoute } from "./routes/SuperAdminRoute";
 import { MessagesAdmin } from "@/features/internal-messages/MessagesAdmin";
 import { MessageEditor } from "@/features/internal-messages/MessageEditor";
@@ -36,9 +35,12 @@ export default function App() {
                 <Route index element={<Dashboard />} />
                 <Route path="employees" element={<Employees />} />
                 <Route path="employees/:id" element={<EmployeeDetail />} />
-                <Route path="performance" element={<Performance />} />
-                <Route path="performance/rules" element={<ProductivityRules />} />
-                <Route path="settings" element={<Settings />} />
+                <Route path="performance" element={<AdminScope view="performance"><Performance /></AdminScope>} />
+                <Route path="performance/rules" element={<AdminScope view="rules"><ProductivityRules /></AdminScope>} />
+                <Route path="settings" element={<AdminScope view="settings"><WorkspaceSettings /></AdminScope>} />
+                <Route path="attendance" element={<AdminScope view="attendance"><Attendance /></AdminScope>} />
+                <Route path="agents" element={<AdminScope view="agents"><AgentHealth /></AdminScope>} />
+                <Route path="audit" element={<AdminScope view="audit"><AuditLog /></AdminScope>} />
                 <Route element={<SuperAdminRoute />}>
                   <Route path="internal/messages" element={<MessagesAdmin />} />
                   <Route path="internal/messages/new" element={<MessageEditor />} />

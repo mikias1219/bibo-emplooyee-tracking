@@ -206,7 +206,11 @@ impl BackendClient {
         Ok(Session {
             access_token: parsed.tokens.access_token,
             refresh_token: parsed.tokens.refresh_token,
-            email: if user.email.is_empty() { email.to_string() } else { user.email },
+            email: if user.email.is_empty() {
+                email.to_string()
+            } else {
+                user.email
+            },
             business_id: business_id.map(|s| s.to_string()),
             display_name: user.display_name,
             username: user.username,
@@ -279,7 +283,11 @@ impl BackendClient {
             let resp = self
                 .http
                 .get(self.url("/v1/messages"))
-                .query(&[("platform", platform), ("version", version), ("locale", locale)])
+                .query(&[
+                    ("platform", platform),
+                    ("version", version),
+                    ("locale", locale),
+                ])
                 .bearer_auth(&token)
                 .send()
                 .await
@@ -668,7 +676,10 @@ impl BackendClient {
             let resp = self
                 .http
                 .get(self.url("/v1/reports/employees"))
-                .query(&[("business_id", business_id.to_string()), ("day_start", day_start.to_string())])
+                .query(&[
+                    ("business_id", business_id.to_string()),
+                    ("day_start", day_start.to_string()),
+                ])
                 .bearer_auth(&token)
                 .send()
                 .await
@@ -851,6 +862,96 @@ impl BackendClient {
         Err("owner_screenshot_bytes: unreachable retry exhaustion".into())
     }
 
+    /// Generic owner/manager admin call used by the shared admin screens
+    /// (@ctracking/admin-ui) through the `admin_api` command. Only the admin API
+    /// surface is reachable — auth, sync and super-admin routes are refused here.
+    pub async fn owner_request(
+        &self,
+        method: &str,
+        path: &str,
+        query: Option<&serde_json::Map<String, serde_json::Value>>,
+        body: Option<&serde_json::Value>,
+    ) -> Result<serde_json::Value, String> {
+        if !admin_path_allowed(path) {
+            return Err(format!("admin_api: path not allowed: {path}"));
+        }
+        let method = reqwest::Method::from_bytes(method.to_ascii_uppercase().as_bytes())
+            .map_err(|_| format!("admin_api: bad method {method}"))?;
+        let pairs: Vec<(String, String)> = query
+            .map(|q| {
+                q.iter()
+                    .filter(|(_, v)| !v.is_null())
+                    .map(|(k, v)| {
+                        (
+                            k.clone(),
+                            v.as_str()
+                                .map(str::to_string)
+                                .unwrap_or_else(|| v.to_string()),
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        let mut token = self.access_token()?;
+        for attempt in 0..2 {
+            let mut req = self
+                .http
+                .request(method.clone(), self.url(path))
+                .bearer_auth(&token)
+                .query(&pairs);
+            if let Some(b) = body {
+                req = req.json(b);
+            }
+            let resp = req.send().await.map_err(net_err)?;
+            if resp.status() == reqwest::StatusCode::UNAUTHORIZED && attempt == 0 {
+                token = self.refresh().await?;
+                continue;
+            }
+            if !resp.status().is_success() {
+                return Err(status_err(resp).await);
+            }
+            let text = resp.text().await.map_err(|e| e.to_string())?;
+            return Ok(if text.is_empty() {
+                serde_json::Value::Null
+            } else {
+                serde_json::from_str(&text).map_err(|e| e.to_string())?
+            });
+        }
+        Err("owner_request: unreachable retry exhaustion".into())
+    }
+
+    /// `POST /v1/agent/checkin` — report this agent's version, OS and hostname so
+    /// admins see it under Agent health (roadmap M1/M10).
+    pub async fn agent_checkin(&self, device_id: &str) -> Result<(), String> {
+        let body = serde_json::json!({
+            "device_id": device_id,
+            "agent_version": env!("CARGO_PKG_VERSION"),
+            "os": agent_os(),
+            "os_version": os_version(),
+            "hostname": hostname(),
+        });
+        let mut token = self.access_token()?;
+        for attempt in 0..2 {
+            let resp = self
+                .http
+                .post(self.url("/v1/agent/checkin"))
+                .bearer_auth(&token)
+                .json(&body)
+                .send()
+                .await
+                .map_err(net_err)?;
+            if resp.status() == reqwest::StatusCode::UNAUTHORIZED && attempt == 0 {
+                token = self.refresh().await?;
+                continue;
+            }
+            if !resp.status().is_success() {
+                return Err(status_err(resp).await);
+            }
+            return Ok(());
+        }
+        Err("agent_checkin: unreachable retry exhaustion".into())
+    }
+
     /// `POST /v1/businesses/{id}/directory/sync` (auto-refresh on 401) — pull the
     /// latest people/departments/roles from the Selamnew Org&Emp directory now.
     /// People are managed in Org&Emp; the app never creates members itself.
@@ -882,5 +983,70 @@ impl BackendClient {
             return Ok(parsed.members);
         }
         Err("owner_sync_directory: unreachable retry exhaustion".into())
+    }
+}
+
+/// Paths the desktop admin screens may call (owner/manager admin API only).
+fn admin_path_allowed(path: &str) -> bool {
+    if path.contains("..") || path.contains('?') || path.contains('#') || !path.starts_with("/v1/")
+    {
+        return false;
+    }
+    path == "/v1/businesses/mine"
+        || path == "/v1/public/screenshot-privacy-apps"
+        || path.starts_with("/v1/businesses/")
+        || path.starts_with("/v1/reports/")
+}
+
+fn agent_os() -> &'static str {
+    match std::env::consts::OS {
+        "macos" => "macos",
+        "windows" => "windows",
+        _ => "linux",
+    }
+}
+
+/// Best-effort OS release name (Linux: /etc/os-release PRETTY_NAME).
+fn os_version() -> String {
+    if cfg!(target_os = "linux") {
+        if let Ok(s) = std::fs::read_to_string("/etc/os-release") {
+            for line in s.lines() {
+                if let Some(v) = line.strip_prefix("PRETTY_NAME=") {
+                    return v.trim_matches('"').to_string();
+                }
+            }
+        }
+    }
+    String::new()
+}
+
+/// Best-effort machine name (Windows COMPUTERNAME, else HOSTNAME / /etc/hostname).
+fn hostname() -> String {
+    for var in ["COMPUTERNAME", "HOSTNAME"] {
+        if let Ok(v) = std::env::var(var) {
+            if !v.trim().is_empty() {
+                return v.trim().to_string();
+            }
+        }
+    }
+    std::fs::read_to_string("/etc/hostname")
+        .map(|s| s.trim().to_string())
+        .unwrap_or_default()
+}
+
+#[cfg(test)]
+mod admin_path_tests {
+    use super::admin_path_allowed;
+
+    #[test]
+    fn only_admin_paths_are_allowed() {
+        assert!(admin_path_allowed("/v1/businesses/mine"));
+        assert!(admin_path_allowed("/v1/businesses/abc/attendance"));
+        assert!(admin_path_allowed("/v1/reports/employees"));
+        assert!(!admin_path_allowed("/v1/auth/login"));
+        assert!(!admin_path_allowed("/v1/admin/messages"));
+        assert!(!admin_path_allowed("/v1/sync/batch"));
+        assert!(!admin_path_allowed("/v1/businesses/../auth/login"));
+        assert!(!admin_path_allowed("https://evil.example/v1/businesses/x"));
     }
 }

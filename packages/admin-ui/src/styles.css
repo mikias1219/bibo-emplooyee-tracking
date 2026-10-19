@@ -1,0 +1,1053 @@
+/* Generated from apps/web-admin theme.css: rules for the shared admin screens,
+   scoped under .wi-admin so they never leak into the host app. Tokens
+   (var(--…)) come from the host theme. */
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.wi-admin .num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+.wi-admin .muted {
+  color: var(--text-muted);
+}
+.wi-admin .admin-topbar .bibo-seg {
+  min-height: 38px;
+  background: #f3f4fc;
+}
+.wi-admin .bibo-seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 3px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+}
+.wi-admin .bibo-seg--sm {
+  padding: 4px 5px;
+}
+.wi-admin .bibo-seg__opt {
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 6px 13px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.wi-admin .bibo-seg__opt--on {
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.25);
+}
+:root[data-theme="dark"] .wi-admin .bibo-seg {
+  background: #11151e;
+}
+:root[data-theme="dark"] .wi-admin .bibo-seg__opt {
+  color: #a6adbf;
+}
+:root[data-theme="dark"] .wi-admin .bibo-seg__opt--on {
+  background: #171a25;
+  border-color: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.45);
+}
+.wi-admin .pill {
+  font-size: var(--fz-xs);
+  padding: 2px var(--sp-2);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--border);
+}
+.wi-admin .segmented {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-sunken);
+  border-radius: 999px;
+  flex-wrap: wrap;
+}
+.wi-admin .segmented button {
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.12s ease;
+}
+.wi-admin .segmented button:not(.active):not([disabled]):hover {
+  color: var(--text);
+}
+.wi-admin .segmented button.active {
+  background: #fff;
+  color: var(--text);
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.25);
+}
+.wi-admin .segmented button[disabled] {
+  cursor: default;
+}
+:root[data-theme="dark"] .wi-admin .segmented {
+  background: #11151e;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+:root[data-theme="dark"] .wi-admin .segmented button {
+  color: #a6adbf;
+}
+:root[data-theme="dark"] .wi-admin .segmented button.active {
+  background: #1b212d;
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+.wi-admin .row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.wi-admin .set-group {
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  box-shadow: 0 8px 24px rgba(24, 32, 64, 0.08), 0 2px 6px rgba(24, 32, 64, 0.04);
+  overflow: hidden;
+}
+:root[data-theme="dark"] .wi-admin .set-group {
+  background: #161b25;
+  border-color: rgba(255, 255, 255, 0.06);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.wi-admin .set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wi-admin .set-row:last-child {
+  border-bottom: none;
+}
+.wi-admin .set-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  letter-spacing: -0.01em;
+}
+.wi-admin .set-desc {
+  color: #9aa1b4;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-top: 3px;
+  max-width: 64ch;
+}
+@media (max-width: 640px) {
+  .wi-admin .set-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+.wi-admin .admin-readonly {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5b6276;
+}
+.wi-admin .admin-set-sec {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #9aa1b4;
+  margin: 22px 4px 10px;
+}
+.wi-admin .input-affix .input {
+  flex: 1;
+}
+.wi-admin .input,
+.wi-admin select.input {
+  font: inherit;
+  font-size: var(--fz-sm);
+  color: var(--text);
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 7px var(--sp-3);
+  width: 100%;
+}
+.wi-admin .input:focus,
+.wi-admin select.input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.wi-admin .input::placeholder {
+  color: var(--text-muted);
+}
+.wi-admin .notice {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fz-sm);
+  display: flex;
+  gap: var(--sp-2);
+  align-items: flex-start;
+}
+.wi-admin .notice-danger {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 35%, transparent);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+}
+.wi-admin .notice-success {
+  color: var(--success);
+  border-color: color-mix(in srgb, var(--success) 35%, transparent);
+  background: color-mix(in srgb, var(--success) 8%, transparent);
+}
+.wi-admin .notice-info {
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+}
+.wi-admin .empty {
+  color: var(--text-muted);
+  font-size: var(--fz-sm);
+  padding: var(--sp-5);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.wi-admin .bibo-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-inset);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.wi-admin .bibo-input:focus-within {
+  border-color: #8b7df6;
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.45);
+}
+.wi-admin .bibo-input input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+.wi-admin .bibo-input input::placeholder {
+  color: var(--text-muted);
+}
+.wi-admin .bibo-input input:-webkit-autofill,
+.wi-admin .bibo-input input:-webkit-autofill:hover,
+.wi-admin .bibo-input input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text);
+  caret-color: var(--text);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+.wi-admin .bibo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.wi-admin .bibo-btn--sm {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13.5px;
+  gap: 6px;
+}
+.wi-admin .bibo-btn--sm svg {
+  width: 16px;
+  height: 16px;
+}
+:root[data-theme="dark"] .wi-admin .set-group .bibo-btn--secondary {
+  background: #161b25;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f3f8;
+}
+:root[data-theme="dark"] .wi-admin .set-group .bibo-btn--secondary:hover:not(:disabled) {
+  background: #1f2633;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f3f8;
+}
+.wi-admin .bibo-btn--primary {
+  background: #6c5ce7;
+  color: #fff;
+  box-shadow: 0 12px 24px -12px rgba(108, 92, 231, 0.9);
+}
+.wi-admin .bibo-btn--primary:hover:not(:disabled) {
+  background: #5f4dd0;
+}
+.wi-admin .bibo-btn--primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
+  transform: none;
+}
+.wi-admin .bibo-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.wi-admin .bibo-btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 0 8px;
+}
+.wi-admin .bibo-btn--ghost:hover:not(:disabled) {
+  color: var(--text);
+}
+.wi-admin .bibo-btn--ghost svg {
+  width: 22px;
+  height: 22px;
+}
+.wi-admin .admin-muted {
+  color: var(--text-muted);
+}
+.wi-admin .admin-link {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6c5ce7;
+  text-decoration: none;
+  cursor: pointer;
+}
+.wi-admin .admin-link:hover {
+  text-decoration: underline;
+}
+.wi-admin .admin-addmember .bibo-btn {
+  height: 42px;
+}
+.wi-admin .bibo-btn--secondary {
+  background: var(--bg-inset);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.wi-admin .bibo-btn--secondary:hover:not(:disabled) {
+  border-color: #6c5ce7;
+  color: #6c5ce7;
+}
+.wi-admin .bibo-btn--secondary svg {
+  width: 20px;
+  height: 20px;
+}
+.wi-admin .lang-opt.active {
+  color: var(--accent);
+  background: var(--accent-weak);
+  font-weight: 600;
+}
+.wi-admin .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-5);
+  z-index: 50;
+}
+.wi-admin .modal {
+  background: var(--surface-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--sp-5);
+  width: 420px;
+  max-width: 100%;
+}
+.wi-admin .modal h2 {
+  font-size: var(--fz-md);
+  margin: 0 0 var(--sp-3);
+}
+.wi-admin .modal-backdrop:has(.bibo-dlg) {
+  background: rgba(20, 24, 40, 0.32);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.wi-admin .bibo-dlg__foot .bibo-btn--primary {
+  color: #f1f3f8;
+}
+.wi-admin .bibo-dlg__foot .bibo-btn--ghost {
+  color: #a6adbf;
+}
+.wi-admin .bibo-dlg .bibo-btn--secondary {
+  font-size: 14px;
+}
+.wi-admin .bibo-dlg .bibo-btn--secondary svg {
+  width: 24px;
+  height: 24px;
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-btn--secondary {
+  background: #161b25;
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f1f3f8;
+}
+.wi-admin .bibo-dlg .bibo-btn--secondary:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-input {
+  background: #1b212d;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-input:hover:not(:focus-within) {
+  border-color: rgba(255, 255, 255, 0.18);
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-input:focus-within {
+  border-color: var(--brand-400);
+  box-shadow: var(--ring-focus);
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-input input {
+  color: #f4f2fe;
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg .bibo-input input::placeholder {
+  color: #5b6276;
+}
+:root[data-theme="dark"] .wi-admin .bibo-dlg--org .bibo-input input::placeholder {
+  color: #a6adbf;
+}
+.wi-admin .spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wi-admin .spinner {
+    animation-duration: 1.6s;
+  }
+}
+.wi-admin .toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-4);
+}
+.wi-admin .tabs button.active {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+.wi-admin .admin-wrap {
+  max-width: 1180px;
+  margin-inline: auto;
+}
+.wi-admin .admin-pagehead {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+.wi-admin .admin-pagehead__main {
+  min-width: 0;
+}
+.wi-admin .admin-pagehead__actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.wi-admin .admin-pagehead__actions .bibo-btn--secondary {
+  background: #ffffff;
+  color: var(--text);
+  border: 1px solid rgba(20, 22, 27, 0.11);
+}
+.wi-admin .admin-pagehead__actions .bibo-btn--secondary:hover:not(:disabled) {
+  background: #f5f7fc;
+  color: var(--text);
+  border-color: rgba(20, 22, 27, 0.18);
+}
+:root[data-theme="dark"] .wi-admin .admin-pagehead__actions .bibo-btn--secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+:root[data-theme="dark"] .wi-admin .admin-pagehead__actions .bibo-btn--secondary:hover:not(:disabled) {
+  background: #1f2633;
+  color: #fff;
+  border-color: #1f2633;
+}
+.wi-admin .admin-pagehead__actions .bibo-btn {
+  font-size: 14px;
+}
+.wi-admin .admin-pagehead__actions .bibo-btn--secondary svg {
+  width: 22px;
+  height: 22px;
+}
+.wi-admin .admin-h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.wi-admin .admin-sub {
+  margin: 12px 0 0;
+  color: #9aa1b4;
+  font-size: 13px;
+}
+.wi-admin .admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.wi-admin .admin-cardpad {
+  padding: 19px 23px;
+}
+.wi-admin .admin-stats .bibo-card {
+  box-shadow: 0 6px 18px -8px rgba(20, 22, 40, 0.22);
+}
+.wi-admin .admin-stats .bibo-card--focal {
+  box-shadow: 0 16px 34px -10px rgba(20, 22, 40, 0.45);
+}
+.wi-admin .admin-stats .bibo-card--default {
+  background: #ffffff;
+}
+:root[data-theme="dark"] .wi-admin .admin-stats .bibo-card--default {
+  background: #161b25;
+}
+.wi-admin .bibo-card {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.wi-admin .bibo-card--focal {
+  background: var(--focal-grad);
+  border-color: var(--focal-border);
+}
+.wi-admin .bibo-stat--focal .bibo-stat__value {
+  color: #fff;
+}
+.wi-admin .bibo-stat--focal .bibo-stat__label,
+.wi-admin .bibo-stat--focal .bibo-stat__unit,
+.wi-admin .bibo-stat--focal .bibo-stat__sub {
+  color: var(--focal-muted);
+}
+.wi-admin .bibo-stat__top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.wi-admin .bibo-stat__icon {
+  display: grid;
+  place-items: center;
+  width: 43px;
+  height: 43px;
+  border-radius: 12px;
+  background: var(--brand-tint);
+  border: none;
+  color: var(--brand-600);
+}
+.wi-admin .bibo-stat__icon svg {
+  width: 20px;
+  height: 20px;
+}
+:root[data-theme="dark"] .wi-admin .bibo-stat__icon {
+  background: var(--brand-tint);
+  border-color: transparent;
+  color: var(--brand-600);
+}
+.wi-admin .bibo-stat--focal .bibo-stat__icon,
+:root[data-theme="dark"] .wi-admin .bibo-stat--focal .bibo-stat__icon {
+  background: #2c2d32;
+  border-color: transparent;
+  color: #fff;
+}
+.wi-admin .bibo-stat__label {
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+.wi-admin .bibo-stat__value {
+  margin-top: 13px;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .bibo-stat__unit {
+  margin-left: 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+.wi-admin .bibo-stat__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 13px;
+}
+.wi-admin .bibo-stat__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.wi-admin .bibo-stat__delta svg {
+  width: 13px;
+  height: 13px;
+}
+.wi-admin .bibo-stat__delta--up {
+  color: var(--positive);
+}
+.wi-admin .bibo-stat__delta--down {
+  color: var(--negative);
+}
+.wi-admin .bibo-stat__sub {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.wi-admin .admin-tablecard {
+  padding: 6px 12px;
+  overflow-x: auto;
+  background: #ffffff;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.wi-admin .admin-tablecard::-webkit-scrollbar {
+  display: none;
+}
+:root[data-theme="dark"] .wi-admin .admin-tablecard {
+  background: #171a25;
+}
+.wi-admin .admin-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+}
+.wi-admin .admin-table th {
+  text-align: left;
+  padding: 18px 20px;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: #9aa1b4;
+}
+.wi-admin .admin-table th.r,
+.wi-admin .admin-table td.r {
+  text-align: right;
+}
+.wi-admin .admin-table th:last-child,
+.wi-admin .admin-table td:last-child {
+  position: sticky;
+  right: 0;
+  background: #ffffff;
+  box-shadow: -10px 0 12px -10px rgba(20, 22, 40, 0.28);
+}
+:root[data-theme="dark"] .wi-admin .admin-table th:last-child,
+:root[data-theme="dark"] .wi-admin .admin-table td:last-child {
+  background: #171a25;
+}
+.wi-admin .admin-table tbody td {
+  transition: background 0.12s ease;
+}
+.wi-admin .admin-table tbody tr:hover td {
+  background: #f3f4fc;
+}
+:root[data-theme="dark"] .wi-admin .admin-table tbody tr:hover td {
+  background: #1f2633;
+}
+.wi-admin .admin-table td {
+  padding: 16px 20px;
+  border-top: 0.5px solid rgba(20, 22, 27, 0.07);
+  vertical-align: middle;
+}
+:root[data-theme="dark"] .wi-admin .admin-table td {
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+.wi-admin .admin-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.wi-admin .admin-name__txt {
+  font-size: 15px;
+  font-weight: 600;
+  min-width: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.3;
+}
+.wi-admin .admin-login {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.wi-admin .admin-dur {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-viewlink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: #5b4bd6;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+}
+.wi-admin .admin-viewlink svg {
+  width: 14px;
+  height: 14px;
+}
+.wi-admin .admin-viewlink:hover {
+  text-decoration: underline;
+}
+@media (max-width: 1080px) {
+  .wi-admin .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 560px) {
+  .wi-admin .admin-stats {
+    grid-template-columns: 1fr;
+  }
+}
+.wi-admin .admin-datemode {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.wi-admin .admin-datemode .bibo-seg {
+  background: #f2f4fb;
+}
+.wi-admin .admin-datefield {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+:root[data-theme="dark"] .wi-admin .admin-datefield {
+  background: #1b212d;
+}
+.wi-admin .admin-datefield svg {
+  width: 15px;
+  height: 15px;
+  color: var(--text-muted);
+}
+.wi-admin .admin-datefield input {
+  border: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-datefield__lbl {
+  font-size: 9px;
+  font-weight: 800;
+  color: #9aa1b4;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.wi-admin .bibo-tabs {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.wi-admin .bibo-tab {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  background: transparent;
+  height: 34px;
+  padding: 0 15px;
+  border-radius: 999px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.wi-admin .bibo-tab:hover {
+  color: var(--text);
+}
+.wi-admin .bibo-tab--on,
+.wi-admin .bibo-tab--on:hover {
+  color: var(--brand-600);
+  background: var(--brand-tint);
+}
+:root[data-theme="dark"] .wi-admin .bibo-tab--on,
+:root[data-theme="dark"] .wi-admin .bibo-tab--on:hover {
+  color: #4a3bc0;
+  background: #e9e8f3;
+}
+.wi-admin .admin-twocol {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .wi-admin .admin-twocol {
+    grid-template-columns: 1fr;
+  }
+}
+:root[data-theme="dark"] .wi-admin .admin-panel .bibo-card--default {
+  background: #171a25;
+}
+.wi-admin .admin-panelhead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.wi-admin .admin-paneltitle {
+  font-size: 14.5px;
+  font-weight: 800;
+}
+.wi-admin .admin-appbar__name .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: none;
+}
+.wi-admin .admin-panel .admin-table .admin-name {
+  gap: 10px;
+}
+.wi-admin .admin-panel .admin-table .admin-name__txt {
+  font-size: 13px;
+}
+.wi-admin .admin-panel .admin-tablecard {
+  padding-bottom: 24px;
+}
+.wi-admin .admin-table.im-table {
+  min-width: 0;
+}
+.wi-admin .admin-table.im-table th,
+.wi-admin .admin-table.im-table td {
+  padding: 10px 12px;
+}
+.wi-admin .admin-table.im-table th:last-child,
+.wi-admin .admin-table.im-table td:last-child {
+  position: static;
+  background: transparent;
+  box-shadow: none;
+}
+.wi-admin .admin-table.im-table tbody tr:hover td {
+  background: transparent;
+}
+:root[data-theme="dark"] .wi-admin .admin-table.im-table th:last-child,
+:root[data-theme="dark"] .wi-admin .admin-table.im-table td:last-child,
+:root[data-theme="dark"] .wi-admin .admin-table.im-table tbody tr:hover td {
+  background: transparent;
+}
+.wi-admin .admin-table.im-resp th {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.wi-admin .admin-table.im-resp th.im-resp__q {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 13px;
+}
+.wi-admin a.bibo-tab {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+.wi-admin .admin-perfbar {
+  display: flex;
+  width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface-sunken);
+}
+.wi-admin .admin-perfbar > span {
+  display: block;
+  height: 100%;
+}
+.wi-admin .admin-perflegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+.wi-admin .admin-perflegend > span,
+.wi-admin .admin-perfname {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.wi-admin .admin-perflegend .dot,
+.wi-admin .admin-perfname .dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex: none;
+}
+.wi-admin .admin-perfdays {
+  display: grid;
+  gap: 8px;
+}
+.wi-admin .admin-perfday {
+  display: grid;
+  grid-template-columns: 48px 1fr 44px;
+  align-items: center;
+  gap: 12px;
+}
+.wi-admin .admin-perfday > div {
+  display: flex;
+}
+.wi-admin .admin-perfday__lbl {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-perfday__val {
+  font-size: 12.5px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-perfrank {
+  display: grid;
+  gap: 2px;
+}
+.wi-admin .admin-perfrank__row {
+  display: grid;
+  grid-template-columns: 1fr auto 48px;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 6px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.wi-admin .admin-perfrank__row:hover {
+  background: var(--bg-subtle);
+}
+.wi-admin .admin-perfrank__name {
+  font-weight: 600;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.wi-admin .admin-perfrank__val {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-perfrank__pct {
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.wi-admin .admin-perftarget {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+}
+.wi-admin .admin-perftarget > label {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 260px;
+  font-size: 13px;
+}
+.wi-admin .admin-perftarget__input {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.wi-admin .admin-perftarget__input .bibo-input {
+  width: 88px;
+}
+.wi-admin .admin-perfrules__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.wi-admin .admin-perfrules__add {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.wi-admin .admin-perfrules__add .bibo-input {
+  flex: 1;
+  min-width: 0;
+}
+.wi-admin .admin-perfcat {
+  display: inline-flex;
+}
+@media (max-width: 760px) {
+  .wi-admin .admin-perfcat .bibo-seg__opt {
+    padding-inline: 6px;
+    font-size: 11.5px;
+  }
+}

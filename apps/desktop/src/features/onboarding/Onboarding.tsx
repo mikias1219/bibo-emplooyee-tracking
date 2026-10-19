@@ -1,30 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "@/i18n";
 import { AuthTitleBar } from "@/shared/components/AuthTitleBar";
-import { LanguageSwitcher } from "@/shared/components/LanguageSwitcher";
 import { Permissions } from "@/features/permissions/Permissions";
 import type { AppSettings, CaptureManaged } from "@/features/settings/Settings";
-
-import enSettings from "@/i18n/locales/en/settings.json";
-import zhSettings from "@/i18n/locales/zh/settings.json";
-import jaSettings from "@/i18n/locales/ja/settings.json";
-import viSettings from "@/i18n/locales/vi/settings.json";
-import idSettings from "@/i18n/locales/id/settings.json";
-import frSettings from "@/i18n/locales/fr/settings.json";
-import esSettings from "@/i18n/locales/es/settings.json";
-
-// The capture controls reuse the `settings` namespace labels/units; register it here
-// too (idempotent) so onboarding works even if Settings hasn't mounted yet.
-const SETTINGS_BUNDLES: Record<string, object> = {
-  en: enSettings, zh: zhSettings, ja: jaSettings, vi: viSettings,
-  id: idSettings, fr: frSettings, es: esSettings,
-};
-for (const [lng, bundle] of Object.entries(SETTINGS_BUNDLES)) {
-  if (!i18n.hasResourceBundle(lng, "settings")) {
-    i18n.addResourceBundle(lng, "settings", bundle, true, true);
-  }
-}
 
 /* ---- inline icons ---- */
 const CameraIcon = () => (
@@ -294,7 +272,6 @@ export function Onboarding({
     <div className="login welcome onboarding-screen">
       <AuthTitleBar />
       <div className="welcome-lang">
-        <LanguageSwitcher compact />
       </div>
 
       <div className="capture-steps">

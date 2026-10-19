@@ -52,6 +52,10 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 	keepaliveH := handlers.NewKeepaliveHandler(cfg.KeepaliveToken)
 	messagesH := handlers.NewMessagesHandler(st, cfg.JWTSecret)
 	adminMsgH := handlers.NewAdminMessagesHandler(st)
+	agentsH := handlers.NewAgentsHandler(st)
+	attendanceH := handlers.NewAttendanceHandler(st)
+	policiesH := handlers.NewPoliciesHandler(st)
+	auditH := handlers.NewAuditHandler(st)
 
 	// Counted installer downloads (production, when static content is served). Takes
 	// precedence over the static NoRoute fallback below.
@@ -129,6 +133,20 @@ func New(cfg *config.Config, st *store.Store, files *filestore.Store, ret *reten
 	authed.DELETE("/businesses/:id/productivity/rules/:ruleId", productivityH.DeleteRule)
 	authed.GET("/businesses/:id/productivity/usage", productivityH.Usage)
 	authed.GET("/businesses/:id/performance", productivityH.Performance)
+
+	// ── Roadmap foundation (docs/roadmap/MODULES.md) ──
+	// M1/M10 Agent health: agents check in with version/OS; admins list them.
+	authed.POST("/agent/checkin", agentsH.Checkin)
+	authed.GET("/businesses/:id/agents", agentsH.List)
+	// M6 Observed attendance (first/last activity per employee per day).
+	authed.GET("/businesses/:id/attendance", attendanceH.List)
+	// M10 Per-department monitoring policies (override the organization policy).
+	authed.GET("/businesses/:id/department-policies", policiesH.List)
+	authed.GET("/businesses/:id/department-policies/:dept", policiesH.Get)
+	authed.PUT("/businesses/:id/department-policies/:dept", policiesH.Put)
+	authed.DELETE("/businesses/:id/department-policies/:dept", policiesH.Delete)
+	// M9 Audit log (who viewed which report/screenshot, who changed settings).
+	authed.GET("/businesses/:id/audit", auditH.List)
 
 	// Serve static content (same origin as the API) when configured:
 	//   /         → marketing landing page (dir/index.html)

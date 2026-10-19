@@ -12,8 +12,8 @@ features/<name>/      one folder per area — owns its pages, components and api
   dashboard/          team roster + KPIs
   employees/          directory-backed roster, department filter, Org&Emp sync, api.ts
     detail/           per-employee reports (+ panels/)
-  performance/        performance report + productivity rules, api.ts
-  settings/           capture policy, privacy skip-list, retention, api.ts
+  admin/              AdminScope + api.ts: hosts the shared screens from packages/admin-ui
+                      (Performance, Rules, Workspace settings, Attendance, Agents, Audit)
   internal-messages/  super-admin in-app messages, api.ts
 shared/               used by 2+ features; never imports from features/
   api/                client (fetch + token refresh), tokenStore, types, demo data
@@ -28,7 +28,7 @@ i18n/                 i18next setup + locales/<lang>/<namespace>.json
 1. Create `features/<name>/` with the page component(s).
 2. Put its HTTP calls in `features/<name>/api.ts` using `request()` from
    `@/shared/api/client`; add response shapes to `@/shared/api/types`.
-3. Add strings to `i18n/locales/en/*.json` (other languages fall back to English).
+3. Add strings to `i18n/locales/en/*.json` (the UI is English-only).
 4. Register the route in `app/App.tsx` and, if needed, a nav item in `app/layout/AppShell.tsx`.
 
 Move code into `shared/` only once a second feature needs it.
